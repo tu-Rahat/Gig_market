@@ -5,6 +5,8 @@ import PublicLayout from "../layouts/PublicLayout";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
+import Dashboard from "../pages/Dashboard";
+import ProtectedRoute from "../features/auth/ProtectedRoute";
 
 
 const AppRoutes = () => {
@@ -28,6 +30,15 @@ const AppRoutes = () => {
                 <Route 
                     path="/register" 
                     element={<Register />} 
+                />
+
+                <Route
+                    path="/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
                 />
 
             </Route>
