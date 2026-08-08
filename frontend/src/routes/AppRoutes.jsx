@@ -1,3 +1,5 @@
+import FeaturePlaceholder
+    from "../pages/FeaturePlaceholder";
 import { Routes, Route } from "react-router-dom";
 
 import PublicLayout from "../layouts/PublicLayout";
@@ -58,6 +60,158 @@ const AppRoutes = () => {
                         </ProtectedRoute>
                     }
                 />
+                <Route
+    path="/tasks/mine"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/tasks/browse"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/bids/ranking"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/bids/expiration"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/workers/select"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/workers/filter"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/profile/professional"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/reviews"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/badges"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/bidders/compare"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/payments/escrow"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/jobs/countdown"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/jobs/completion"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/jobs/approval"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/payments/auto-release"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/disputes"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/transactions"
+    element={
+        <ProtectedRoute>
+            <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
 
             </Route>
 
