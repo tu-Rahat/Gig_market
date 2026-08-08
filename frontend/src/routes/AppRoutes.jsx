@@ -6,6 +6,8 @@ import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
+import CategoryManagement from "../pages/CategoryManagement";
+import CreateTask from "../pages/CreateTask";
 import ProtectedRoute from "../features/auth/ProtectedRoute";
 
 
@@ -37,6 +39,22 @@ const AppRoutes = () => {
                     element={
                         <ProtectedRoute>
                             <Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/categories/manage"
+                    element={
+                        <ProtectedRoute>
+                            <CategoryManagement />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/tasks/create"
+                    element={
+                        <ProtectedRoute>
+                            <CreateTask />
                         </ProtectedRoute>
                     }
                 />
