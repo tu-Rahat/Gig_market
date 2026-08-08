@@ -57,7 +57,7 @@ const taskSchema = new mongoose.Schema(
     }
 );
 
-taskSchema.pre("validate", function (next) {
+taskSchema.pre("validate", function () {
     if (
         this.budgetMin !== undefined &&
         this.budgetMax !== undefined &&
@@ -68,7 +68,6 @@ taskSchema.pre("validate", function (next) {
             "Maximum budget must be greater than or equal to minimum budget"
         );
     }
-    next();
 });
 
 const Task = mongoose.model("Task", taskSchema);
