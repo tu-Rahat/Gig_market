@@ -13,6 +13,10 @@ import CreateTask from "../pages/CreateTask";
 import ProtectedRoute from "../features/auth/ProtectedRoute";
 import Escrow from "../pages/Escrow";
 import TaskCountdown from "../pages/TaskCountdown";
+import WorkCompletion from "../pages/WorkCompletion";
+import OwnerApproval from "../pages/OwnerApproval";
+
+
 
 const AppRoutes = () => {
 
@@ -173,7 +177,7 @@ const AppRoutes = () => {
     path="/jobs/completion"
     element={
         <ProtectedRoute>
-            <FeaturePlaceholder />
+            <WorkCompletion />
         </ProtectedRoute>
     }
 />
@@ -182,7 +186,7 @@ const AppRoutes = () => {
     path="/jobs/approval"
     element={
         <ProtectedRoute>
-            <FeaturePlaceholder />
+            <OwnerApproval />
         </ProtectedRoute>
     }
 />
