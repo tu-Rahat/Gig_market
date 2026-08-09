@@ -4,7 +4,12 @@ const cors = require("cors");
 const authRoutes = require("./modules/auth/auth.route");
 const categoryRoutes = require("./modules/category/category.route");
 const taskRoutes = require("./modules/task/task.route");
-
+const escrowRoutes = require(
+ "./modules/escrow/escrow.route"
+);
+const countdownRoutes = require(
+ "./modules/countdown/countdown.route"
+);
 
 const app = express();
 
@@ -18,6 +23,9 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use("/api/escrow", escrowRoutes);
+app.use("/api/countdowns", countdownRoutes);
+
 
 // Test API
 app.get("/", (req,res)=>{

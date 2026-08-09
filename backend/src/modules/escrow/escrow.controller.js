@@ -1,0 +1,174 @@
+const crypto = require("crypto");
+const Escrow = require("./escrow.model");
+const Task = require("../task/task.model");
+const User = require("../auth/auth.model");
+const createPaymentReference = () => {
+ return `ESC-${Date.now()}-${crypto
+ .randomBytes(4)
+ .toString("hex")
+ .toUpperCase()}`;
+};
+// Feature 15: create a simulated escrow hold
+const createEscrowHold = async (req, res) => {
+ try {
+ const {
+ taskId,
+ selectedWorkerId,
+ amount,
+ completionDeadline
+ } = req.body;
+ if (
+ !taskId ||
+ !selectedWorkerId ||
+ amount === undefined ||
+ !completionDeadline
+ ) {
+ return res.status(400).json({
+ message:
+ "Task, selected worker, amount, and completion deadline are required"
+ });
+ }
+ const numericAmount = Number(amount);
+ if (
+ Number.isNaN(numericAmount) ||
+ numericAmount <= 0
+ ) {
+ return res.status(400).json({
+ message: "Escrow amount must be greater than 0"
+ });
+ }
+ const deadline = new Date(completionDeadline);
+ if (Number.isNaN(deadline.getTime())) {
+ return res.status(400).json({
+ message: "Completion deadline is invalid"
+ });
+ }
+ if (deadline <= new Date()) {
+ return res.status(400).json({
+ message: "Completion deadline must be in the future"
+ });
+ }
+ const task = await Task.findById(taskId);
+ if (!task) {
+ return res.status(404).json({
+ message: "Task not found"
+ });
+ }
+ if (task.createdBy.toString() !== req.user.id) {
+ return res.status(403).json({
+ message:
+ "Only the task owner can create the escrow hold"
+ });
+ }
+ if (selectedWorkerId === req.user.id) {
+ return res.status(400).json({
+ message:
+ "Task owner cannot be selected as the worker"
+ });
+ }
+ const worker = await User.findById(selectedWorkerId);
+ if (!worker) {
+ return res.status(404).json({
+ message: "Selected worker not found"
+ });
+ }
+ const existingHeldEscrow = await Escrow.findOne({
+ task: task._id,
+ status: "held"
+ });
+ if (existingHeldEscrow) {
+ return res.status(400).json({
+ message:
+ "This task already has an active escrow hold"
+ });
+ }
+ const escrow = await Escrow.create({
+ task: task._id,
+ owner: req.user.id,
+ worker: worker._id,
+ amount: numericAmount,
+ paymentReference: createPaymentReference(),
+ completionDeadline: deadline
+ });
+ // This is safe for the current task schema.
+ // Later Worker Selection can perform the same transition.
+ if (task.status === "open") {
+ task.status = "in_progress";
+ await task.save();
+ }
+ await escrow.populate("task", "title status");
+ await escrow.populate("owner", "name email");
+ await escrow.populate("worker", "name email");
+ return res.status(201).json({
+ message:
+ "Demo payment held successfully in escrow",
+ escrow
+ });
+ } catch (error) {
+ return res.status(500).json({
+ message: "Failed to create escrow hold",
+ error: error.message
+ });
+ }
+};
+// Supporting endpoint: escrow records involving logged-in user
+const getMyEscrows = async (req, res) => {
+ try {
+ const escrows = await Escrow.find({
+ $or: [
+ { owner: req.user.id },
+ { worker: req.user.id }
+ ]
+ })
+ .populate("task", "title status")
+ .populate("owner", "name")
+ .populate("worker", "name")
+ .sort({ createdAt: -1 });
+ return res.status(200).json({
+ count: escrows.length,
+ escrows
+ });
+ } catch (error) {
+    return res.status(500).json({
+ message: "Failed to load escrow records",
+ error: error.message
+ });
+ }
+};
+// Supporting endpoint: one escrow record
+const getEscrowById = async (req, res) => {
+ try {
+ const escrow = await Escrow.findById(req.params.id)
+ .populate("task", "title status")
+ .populate("owner", "name")
+ .populate("worker", "name");
+ if (!escrow) {
+ return res.status(404).json({
+ message: "Escrow record not found"
+ });
+ }
+ const userId = req.user.id;
+ if (
+ escrow.owner._id.toString() !== userId &&
+ escrow.worker._id.toString() !== userId
+ ) {
+ return res.status(403).json({
+ message:
+ "You do not have access to this escrow record"
+ });
+ }
+ return res.status(200).json({
+ escrow
+ });
+ } catch (error) {
+ return res.status(500).json({
+ message: "Failed to load escrow record",
+ error: error.message
+ });
+ }
+};
+module.exports = {
+ createEscrowHold,
+ getMyEscrows,
+ getEscrowById
+};
