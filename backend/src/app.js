@@ -10,6 +10,9 @@ const escrowRoutes = require(
 const countdownRoutes = require(
  "./modules/countdown/countdown.route"
 );
+const workSubmissionRoutes = require(
+ "./modules/workSubmission/workSubmission.route"
+);
 
 const app = express();
 
@@ -25,7 +28,10 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/escrow", escrowRoutes);
 app.use("/api/countdowns", countdownRoutes);
-
+app.use(
+ "/api/work-submissions",
+ workSubmissionRoutes
+);
 
 // Test API
 app.get("/", (req,res)=>{
