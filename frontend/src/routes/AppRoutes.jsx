@@ -11,7 +11,8 @@ import Dashboard from "../pages/Dashboard";
 import CategoryManagement from "../pages/CategoryManagement";
 import CreateTask from "../pages/CreateTask";
 import ProtectedRoute from "../features/auth/ProtectedRoute";
-
+import Escrow from "../pages/Escrow";
+import TaskCountdown from "../pages/TaskCountdown";
 
 const AppRoutes = () => {
 
@@ -154,7 +155,7 @@ const AppRoutes = () => {
     path="/payments/escrow"
     element={
         <ProtectedRoute>
-            <FeaturePlaceholder />
+            <Escrow />
         </ProtectedRoute>
     }
 />
@@ -163,7 +164,7 @@ const AppRoutes = () => {
     path="/jobs/countdown"
     element={
         <ProtectedRoute>
-            <FeaturePlaceholder />
+            <TaskCountdown />
         </ProtectedRoute>
     }
 />
