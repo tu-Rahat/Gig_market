@@ -15,6 +15,7 @@ import Escrow from "../pages/Escrow";
 import TaskCountdown from "../pages/TaskCountdown";
 import WorkCompletion from "../pages/WorkCompletion";
 import OwnerApproval from "../pages/OwnerApproval";
+import Credentials from "../pages/Credentials";
 
 
 
@@ -214,6 +215,15 @@ const AppRoutes = () => {
     element={
         <ProtectedRoute>
             <FeaturePlaceholder />
+        </ProtectedRoute>
+    }
+/>
+
+<Route
+    path="/credentials"
+    element={
+        <ProtectedRoute>
+            <Credentials />
         </ProtectedRoute>
     }
 />
