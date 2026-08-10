@@ -1,5 +1,9 @@
 import { Routes, Route } from "react-router-dom";
+import AdminLogin from
+    "../pages/AdminLogin";
 
+import AdminDashboard from
+    "../pages/AdminDashboard";
 import FeaturePlaceholder from "../pages/FeaturePlaceholder";
 
 import PublicLayout from "../layouts/PublicLayout";
@@ -37,6 +41,20 @@ const AppRoutes = () => {
             <Route element={<PublicLayout />}>
 
                 {/* Public Routes */}
+                <Route
+                    path="/admin/login"
+                    element={
+                        <AdminLogin />
+                    }
+                />
+
+
+                <Route
+                    path="/admin"
+                    element={
+                        <AdminDashboard />
+                    }
+                />
 
                 <Route
                     path="/"

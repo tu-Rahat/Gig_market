@@ -301,12 +301,24 @@ const CredentialCenter = () => {
                   {credential.description}
                 </p>
               )}
-              {credential.rejectionReason && (
-                <div className="mt-4 p-3 rounded-xl bg-red-50 text-red-700
-                text-sm">
-                  Rejected: {credential.rejectionReason}
-                </div>
-              )}
+              {credential.verificationStatus === "rejected" && (
+    <div className="mt-4 p-4 rounded-xl bg-red-50 text-red-700">
+
+        <p className="font-medium">
+            Verification Rejected
+        </p>
+
+        <p className="mt-1 text-sm">
+            {credential.rejectionReason ||
+                "No rejection reason was provided."}
+        </p>
+
+        <p className="mt-2 text-xs">
+            Correct the issue if necessary, then request verification again.
+        </p>
+
+    </div>
+)}
               <div className="flex flex-wrap gap-3 mt-5">
                 {(
                   credential.verificationStatus ===
