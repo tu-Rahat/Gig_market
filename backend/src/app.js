@@ -1,5 +1,8 @@
 const express = require("express");
 const cors = require("cors");
+const adminRoutes = require(
+ "./modules/admin/admin.route"
+);
 
 const authRoutes = require(
     "./modules/auth/auth.route"
@@ -97,7 +100,10 @@ app.use(
     "/api/bids",
     bidRoutes
 );
-
+app.use(
+    "/api/admin",
+    adminRoutes
+);
 
 // Test API
 app.get("/", (req, res) => {

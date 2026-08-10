@@ -89,6 +89,10 @@ const credentialSchema = new mongoose.Schema(
       type: Date,
       default: null
     },
+    verifiedByAdmin: {
+    type: String,
+    default: ""
+    },
     rejectionReason: {
       type: String,
       default: "",
