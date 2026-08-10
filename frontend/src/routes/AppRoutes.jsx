@@ -1,28 +1,57 @@
-import FeaturePlaceholder from "../pages/FeaturePlaceholder";
 import { Routes, Route } from "react-router-dom";
+
+import FeaturePlaceholder from "../pages/FeaturePlaceholder";
+
 import PublicLayout from "../layouts/PublicLayout";
+
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Dashboard from "../pages/Dashboard";
+
 import CategoryManagement from "../pages/CategoryManagement";
 import CreateTask from "../pages/CreateTask";
-import ProtectedRoute from "../features/auth/ProtectedRoute";
+
 import Escrow from "../pages/Escrow";
 import TaskCountdown from "../pages/TaskCountdown";
 import WorkCompletion from "../pages/WorkCompletion";
 import OwnerApproval from "../pages/OwnerApproval";
+
 import MyAdvertisements from "../pages/MyAdvertisements";
 import BrowseTasks from "../pages/BrowseTasks";
+
 import Credentials from "../pages/Credentials";
 
+import ProtectedRoute from "../features/auth/ProtectedRoute";
+
+
 const AppRoutes = () => {
+
     return (
+
         <Routes>
+
             <Route element={<PublicLayout />}>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
+
+                {/* Public Routes */}
+
+                <Route
+                    path="/"
+                    element={<Home />}
+                />
+
+                <Route
+                    path="/login"
+                    element={<Login />}
+                />
+
+                <Route
+                    path="/register"
+                    element={<Register />}
+                />
+
+
+                {/* Dashboard */}
 
                 <Route
                     path="/dashboard"
@@ -32,6 +61,9 @@ const AppRoutes = () => {
                         </ProtectedRoute>
                     }
                 />
+
+
+                {/* Member 1 */}
 
                 <Route
                     path="/categories/manage"
@@ -69,6 +101,9 @@ const AppRoutes = () => {
                     }
                 />
 
+
+                {/* Future Member 1 Features */}
+
                 <Route
                     path="/bids/ranking"
                     element={
@@ -95,6 +130,21 @@ const AppRoutes = () => {
                         </ProtectedRoute>
                     }
                 />
+
+
+                {/* Member 2 */}
+
+                <Route
+                    path="/credentials"
+                    element={
+                        <ProtectedRoute>
+                            <Credentials />
+                        </ProtectedRoute>
+                    }
+                />
+
+
+                {/* Future Member 2 Features */}
 
                 <Route
                     path="/workers/filter"
@@ -141,6 +191,9 @@ const AppRoutes = () => {
                     }
                 />
 
+
+                {/* Member 3 */}
+
                 <Route
                     path="/payments/escrow"
                     element={
@@ -149,16 +202,6 @@ const AppRoutes = () => {
                         </ProtectedRoute>
                     }
                 />
-<Route
-    path="/credentials"
-    element={
-        <ProtectedRoute>
-            <Credentials />
-        </ProtectedRoute>
-    }
-/>
-
-            </Route>
 
                 <Route
                     path="/jobs/countdown"
@@ -187,6 +230,9 @@ const AppRoutes = () => {
                     }
                 />
 
+
+                {/* Future Member 3 Features */}
+
                 <Route
                     path="/payments/auto-release"
                     element={
@@ -213,9 +259,14 @@ const AppRoutes = () => {
                         </ProtectedRoute>
                     }
                 />
+
             </Route>
+
         </Routes>
+
     );
+
 };
+
 
 export default AppRoutes;
