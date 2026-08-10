@@ -24,7 +24,7 @@ export const dashboardSections = [
                 description:
                     "Edit or cancel your task advertisements.",
                 path: "/tasks/mine",
-                status: "coming",
+                status: "available",
             },
             {
                 number: 4,
@@ -32,7 +32,7 @@ export const dashboardSections = [
                 description:
                     "Browse open jobs and submit competitive bids.",
                 path: "/tasks/browse",
-                status: "coming",
+                status: "available",
             },
             {
                 number: 5,
@@ -88,7 +88,7 @@ export const dashboardSections = [
                 description:
                     "Find workers based on verified qualifications.",
                 path: "/workers/filter",
-                status: "coming",
+                status: "available",
             },
             {
                 number: 11,
@@ -96,7 +96,7 @@ export const dashboardSections = [
                 description:
                     "Manage skills, experience, and portfolio.",
                 path: "/profile/professional",
-                status: "coming",
+                status: "available",
             },
             {
                 number: 12,
@@ -136,7 +136,7 @@ export const dashboardSections = [
                 description:
                     "Manage demo payments held for active tasks.",
                 path: "/payments/escrow",
-                status: "coming",
+                status: "available",
             },
             {
                 number: 16,
@@ -144,7 +144,7 @@ export const dashboardSections = [
                 description:
                     "Track remaining task completion time.",
                 path: "/jobs/countdown",
-                status: "coming",
+                status: "available",
             },
             {
                 number: 17,
@@ -152,7 +152,7 @@ export const dashboardSections = [
                 description:
                     "Mark work complete and submit proof.",
                 path: "/jobs/completion",
-                status: "coming",
+                status: "available",
             },
             {
                 number: 18,
@@ -160,7 +160,7 @@ export const dashboardSections = [
                 description:
                     "Approve or reject submitted work.",
                 path: "/jobs/approval",
-                status: "coming",
+                status: "available",
             },
             {
                 number: 19,
