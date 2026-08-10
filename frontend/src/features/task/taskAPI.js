@@ -14,3 +14,18 @@ export const getTaskById = async (taskId) => {
     const response = await api.get(`/tasks/${taskId}`);
     return response.data;
 };
+
+export const getMyTasks = async () => {
+    const response = await api.get("/tasks/mine");
+    return response.data;
+};
+
+export const updateTask = async (taskId, taskData) => {
+    const response = await api.patch(`/tasks/${taskId}`, taskData);
+    return response.data;
+};
+
+export const cancelTask = async (taskId) => {
+    const response = await api.patch(`/tasks/${taskId}/cancel`);
+    return response.data;
+};
