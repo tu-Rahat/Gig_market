@@ -1,20 +1,36 @@
 const express = require("express");
 const cors = require("cors");
 
-const authRoutes = require("./modules/auth/auth.route");
-const categoryRoutes = require("./modules/category/category.route");
-const taskRoutes = require("./modules/task/task.route");
+const authRoutes = require(
+    "./modules/auth/auth.route"
+);
+
+const categoryRoutes = require(
+    "./modules/category/category.route"
+);
+
+const taskRoutes = require(
+    "./modules/task/task.route"
+);
+
 const escrowRoutes = require(
- "./modules/escrow/escrow.route"
+    "./modules/escrow/escrow.route"
 );
+
 const countdownRoutes = require(
- "./modules/countdown/countdown.route"
+    "./modules/countdown/countdown.route"
 );
+
 const workSubmissionRoutes = require(
- "./modules/workSubmission/workSubmission.route"
+    "./modules/workSubmission/workSubmission.route"
 );
+
 const credentialRoutes = require(
- "./modules/credential/credential.route"
+    "./modules/credential/credential.route"
+);
+
+const bidRoutes = require(
+    "./modules/bid/bid.route"
 );
 const workerProfileRoutes = require(
  "./modules/workerProfile/workerProfile.route"
@@ -22,6 +38,7 @@ const workerProfileRoutes = require(
 const bidderFilterRoutes = require(
  "./modules/bidderFilter/bidderFilter.route"
 );
+
 
 const app = express();
 
@@ -41,9 +58,52 @@ app.use("/api/work-submissions",workSubmissionRoutes);
 app.use("/api/credentials",credentialRoutes);
 app.use("/api/worker-profiles",workerProfileRoutes);
 app.use("/api/bidder-filter",bidderFilterRoutes);
+app.use(
+    "/api/auth",
+    authRoutes
+);
+
+app.use(
+    "/api/categories",
+    categoryRoutes
+);
+
+app.use(
+    "/api/tasks",
+    taskRoutes
+);
+
+app.use(
+    "/api/escrow",
+    escrowRoutes
+);
+
+app.use(
+    "/api/countdowns",
+    countdownRoutes
+);
+
+app.use(
+    "/api/work-submissions",
+    workSubmissionRoutes
+);
+
+app.use(
+    "/api/credentials",
+    credentialRoutes
+);
+
+app.use(
+    "/api/bids",
+    bidRoutes
+);
+
+
 // Test API
-app.get("/", (req,res)=>{
-    res.send("Gig Market Backend is Running");
+app.get("/", (req, res) => {
+    res.send(
+        "Gig Market Backend is Running"
+    );
 });
 
 
