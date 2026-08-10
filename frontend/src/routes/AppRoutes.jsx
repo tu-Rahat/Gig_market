@@ -149,23 +149,23 @@ const AppRoutes = () => {
 
                 {/* Future Member 2 Features */}
 
-                <Route
+                {/* <Route
                     path="/workers/filter"
                     element={
                         <ProtectedRoute>
                             <FeaturePlaceholder />
                         </ProtectedRoute>
                     }
-                />
+                /> */}
 
-                <Route
+                {/* <Route
                     path="/profile/professional"
                     element={
                         <ProtectedRoute>
                             <FeaturePlaceholder />
                         </ProtectedRoute>
                     }
-                />
+                /> */}
 
                 <Route
                     path="/reviews"
