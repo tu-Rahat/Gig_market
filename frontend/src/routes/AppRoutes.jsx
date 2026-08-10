@@ -213,29 +213,32 @@ const AppRoutes = () => {
     }
 />
 
+                <Route
+                    path="/workers/filter"
+                    element={
+                        <ProtectedRoute>
+                            <CredentialBidderFilter />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/profile/professional"
+                    element={
+                        <ProtectedRoute>
+                            <ProfessionalProfile />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/workers/:userId/profile"
+                    element={
+                        <WorkerProfile />
+                    }
+                />
+
             </Route>
-<Route
-    path="/workers/filter"
-    element={
-        <ProtectedRoute>
-            <CredentialBidderFilter />
-        </ProtectedRoute>
- }
-/>
-<Route
-    path="/profile/professional"
-    element={
-        <ProtectedRoute>
-            <ProfessionalProfile />
-        </ProtectedRoute>
- }
-/>
-<Route
-    path="/workers/:userId/profile"
-    element={
-        <WorkerProfile />
- }
-/>
         </Routes>
         
         
