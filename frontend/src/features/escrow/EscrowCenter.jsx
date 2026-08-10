@@ -26,9 +26,10 @@ const EscrowCenter = () => {
  );
  }
  };
- useEffect(() => {
- loadEscrows();
- }, []);
+	useEffect(() => {
+	// eslint-disable-next-line react-hooks/set-state-in-effect
+	loadEscrows();
+	}, []);
  const handleChange = (event) => {
  setFormData({
  ...formData,

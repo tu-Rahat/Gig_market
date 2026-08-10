@@ -29,7 +29,8 @@ const OwnerApprovalCenter = () => {
  }
  };
  useEffect(() => {
- loadSubmissions();
+       // eslint-disable-next-line react-hooks/set-state-in-effect
+       loadSubmissions();
  }, []);
  const handleApprove = async (
  submissionId

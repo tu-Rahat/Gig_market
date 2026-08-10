@@ -16,7 +16,9 @@ import TaskCountdown from "../pages/TaskCountdown";
 import WorkCompletion from "../pages/WorkCompletion";
 import OwnerApproval from "../pages/OwnerApproval";
 import Credentials from "../pages/Credentials";
-
+import CredentialBidderFilter from "../features/bidderFilter/CredentialBidderFilter";
+import ProfessionalProfile from "../features/workerProfile/ProfessionalProfile";
+import WorkerProfile from "../features/workerProfile/WorkerProfileView";
 
 
 const AppRoutes = () => {
@@ -111,23 +113,6 @@ const AppRoutes = () => {
     }
 />
 
-<Route
-    path="/workers/filter"
-    element={
-        <ProtectedRoute>
-            <FeaturePlaceholder />
-        </ProtectedRoute>
-    }
-/>
-
-<Route
-    path="/profile/professional"
-    element={
-        <ProtectedRoute>
-            <FeaturePlaceholder />
-        </ProtectedRoute>
-    }
-/>
 
 <Route
     path="/reviews"
@@ -229,8 +214,31 @@ const AppRoutes = () => {
 />
 
             </Route>
-
+<Route
+    path="/workers/filter"
+    element={
+        <ProtectedRoute>
+            <CredentialBidderFilter />
+        </ProtectedRoute>
+ }
+/>
+<Route
+    path="/profile/professional"
+    element={
+        <ProtectedRoute>
+            <ProfessionalProfile />
+        </ProtectedRoute>
+ }
+/>
+<Route
+    path="/workers/:userId/profile"
+    element={
+        <WorkerProfile />
+ }
+/>
         </Routes>
+        
+        
 
     );
 

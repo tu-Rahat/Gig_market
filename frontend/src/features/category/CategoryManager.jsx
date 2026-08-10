@@ -30,6 +30,8 @@ const CategoryManager = () => {
     };
 
     useEffect(() => {
+        // Calling loader triggers state updates; disable this specific lint rule here.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadCategories();
     }, []);
 

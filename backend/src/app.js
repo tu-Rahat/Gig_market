@@ -16,6 +16,12 @@ const workSubmissionRoutes = require(
 const credentialRoutes = require(
  "./modules/credential/credential.route"
 );
+const workerProfileRoutes = require(
+ "./modules/workerProfile/workerProfile.route"
+);
+const bidderFilterRoutes = require(
+ "./modules/bidderFilter/bidderFilter.route"
+);
 
 const app = express();
 
@@ -33,7 +39,8 @@ app.use("/api/escrow", escrowRoutes);
 app.use("/api/countdowns", countdownRoutes);
 app.use("/api/work-submissions",workSubmissionRoutes);
 app.use("/api/credentials",credentialRoutes);
-
+app.use("/api/worker-profiles",workerProfileRoutes);
+app.use("/api/bidder-filter",bidderFilterRoutes);
 // Test API
 app.get("/", (req,res)=>{
     res.send("Gig Market Backend is Running");

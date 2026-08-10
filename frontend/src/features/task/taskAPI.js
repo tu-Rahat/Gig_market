@@ -14,3 +14,6 @@ export const getTaskById = async (taskId) => {
     const response = await api.get(`/tasks/${taskId}`);
     return response.data;
 };
+
+// Backwards-compatible alias expected elsewhere
+export const getMyTasks = getTasks;
