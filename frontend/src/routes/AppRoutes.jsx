@@ -14,6 +14,7 @@ import WorkCompletion from "../pages/WorkCompletion";
 import OwnerApproval from "../pages/OwnerApproval";
 import MyAdvertisements from "../pages/MyAdvertisements";
 import BrowseTasks from "../pages/BrowseTasks";
+import Credentials from "../pages/Credentials";
 
 const AppRoutes = () => {
     return (
@@ -148,6 +149,16 @@ const AppRoutes = () => {
                         </ProtectedRoute>
                     }
                 />
+<Route
+    path="/credentials"
+    element={
+        <ProtectedRoute>
+            <Credentials />
+        </ProtectedRoute>
+    }
+/>
+
+            </Route>
 
                 <Route
                     path="/jobs/countdown"
