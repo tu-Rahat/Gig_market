@@ -21,6 +21,9 @@ import MyAdvertisements from "../pages/MyAdvertisements";
 import BrowseTasks from "../pages/BrowseTasks";
 
 import Credentials from "../pages/Credentials";
+import CredentialBidderFilter from "../features/bidderFilter/CredentialBidderFilter";
+import ProfessionalProfile from "../features/workerProfile/ProfessionalProfile";
+import WorkerProfile from "../features/workerProfile/WorkerProfileView";
 
 import ProtectedRoute from "../features/auth/ProtectedRoute";
 
@@ -260,9 +263,35 @@ const AppRoutes = () => {
                     }
                 />
 
-            </Route>
+                <Route
+                    path="/workers/filter"
+                    element={
+                        <ProtectedRoute>
+                            <CredentialBidderFilter />
+                        </ProtectedRoute>
+                    }
+                />
 
+                <Route
+                    path="/profile/professional"
+                    element={
+                        <ProtectedRoute>
+                            <ProfessionalProfile />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/workers/:userId/profile"
+                    element={
+                        <WorkerProfile />
+                    }
+                />
+
+            </Route>
         </Routes>
+        
+        
 
     );
 

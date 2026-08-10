@@ -32,6 +32,12 @@ const credentialRoutes = require(
 const bidRoutes = require(
     "./modules/bid/bid.route"
 );
+const workerProfileRoutes = require(
+ "./modules/workerProfile/workerProfile.route"
+);
+const bidderFilterRoutes = require(
+ "./modules/bidderFilter/bidderFilter.route"
+);
 
 
 const app = express();
@@ -43,6 +49,15 @@ app.use(express.json());
 
 
 // Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/categories", categoryRoutes);
+app.use("/api/tasks", taskRoutes);
+app.use("/api/escrow", escrowRoutes);
+app.use("/api/countdowns", countdownRoutes);
+app.use("/api/work-submissions",workSubmissionRoutes);
+app.use("/api/credentials",credentialRoutes);
+app.use("/api/worker-profiles",workerProfileRoutes);
+app.use("/api/bidder-filter",bidderFilterRoutes);
 app.use(
     "/api/auth",
     authRoutes
