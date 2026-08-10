@@ -4,6 +4,10 @@ const cors = require("cors");
 const authRoutes = require("./modules/auth/auth.route");
 const categoryRoutes = require("./modules/category/category.route");
 const taskRoutes = require("./modules/task/task.route");
+const escrowRoutes = require("./modules/escrow/escrow.route");
+const countdownRoutes = require("./modules/countdown/countdown.route");
+const workSubmissionRoutes = require("./modules/workSubmission/workSubmission.route");
+const bidRoutes = require("./modules/bid/bid.route");
 const escrowRoutes = require(
  "./modules/escrow/escrow.route"
 );
@@ -31,6 +35,8 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/escrow", escrowRoutes);
 app.use("/api/countdowns", countdownRoutes);
+app.use("/api/work-submissions", workSubmissionRoutes);
+app.use("/api/bids", bidRoutes);
 app.use("/api/work-submissions",workSubmissionRoutes);
 app.use("/api/credentials",credentialRoutes);
 
