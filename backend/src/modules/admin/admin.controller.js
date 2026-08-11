@@ -12,9 +12,29 @@ const adminLogin = async (req, res) => {
             password
         } = req.body;
 
+        const submittedEmail = String(
+            email || ""
+        )
+            .trim()
+            .toLowerCase();
+
+        const submittedPassword = String(
+            password || ""
+        ).trim();
+
+        const adminEmail = String(
+            process.env.ADMIN_EMAIL || ""
+        )
+            .trim()
+            .toLowerCase();
+
+        const adminPassword = String(
+            process.env.ADMIN_PASSWORD || ""
+        ).trim();
+
         if (
-            email !== process.env.ADMIN_EMAIL ||
-            password !== process.env.ADMIN_PASSWORD
+            submittedEmail !== adminEmail ||
+            submittedPassword !== adminPassword
         ) {
             return res.status(401).json({
                 message:
