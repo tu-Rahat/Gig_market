@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
-  deleteCredential,
   getMyCredentials,
-  requestVerification,
+  updateCredential,
   uploadCredential
 } from "./credentialAPI";
+import CredentialEditModal from "./CredentialEditModal";
 
 const initialForm = {
   credentialType: "certificate",
@@ -15,6 +16,7 @@ const initialForm = {
 };
 
 const CredentialCenter = () => {
+  const navigate = useNavigate();
   const [credentials, setCredentials] =
     useState([]);
   const [formData, setFormData] =
@@ -23,12 +25,16 @@ const CredentialCenter = () => {
     useState(null);
   const [loading, setLoading] =
     useState(false);
-  const [workingId, setWorkingId] =
-    useState(null);
   const [error, setError] =
     useState("");
   const [message, setMessage] =
     useState("");
+  const [editingCredential, setEditingCredential] =
+    useState(null);
+  const [editError, setEditError] =
+    useState("");
+  const [editSaving, setEditSaving] =
+    useState(false);
 
   const loadCredentials = async () => {
     try {
@@ -94,56 +100,52 @@ const CredentialCenter = () => {
     }
   };
 
-  const handleRequestVerification = async (
+  const handleSeeResult = async (
     credentialId
   ) => {
-    try {
-      setWorkingId(credentialId);
-      setError("");
-      setMessage("");
-      const data =
-        await requestVerification(
-          credentialId
-        );
-      setMessage(data.message);
-      await loadCredentials();
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-        "Failed to request verification"
-      );
-    } finally {
-      setWorkingId(null);
-    }
+    navigate(
+      `/verification?credentialId=${credentialId}`
+    );
   };
 
-  const handleDelete = async (
-    credentialId
-  ) => {
-    const confirmed =
-      window.confirm(
-        "Delete this credential?"
+  const handleEditClick = (credential) => {
+    if (credential.verificationStatus === "pending") {
+      setError(
+        "Pending credentials cannot be edited"
       );
-    if (!confirmed) {
       return;
     }
+
+    setError("");
+    setMessage("");
+    setEditError("");
+    setEditingCredential(credential);
+  };
+
+  const handleSaveEdit = async (formData) => {
+    if (!editingCredential) {
+      return;
+    }
+
     try {
-      setWorkingId(credentialId);
-      setError("");
-      setMessage("");
-      const data =
-        await deleteCredential(
-          credentialId
-        );
+      setEditSaving(true);
+      setEditError("");
+
+      const data = await updateCredential(
+        editingCredential._id,
+        formData
+      );
+
       setMessage(data.message);
+      setEditingCredential(null);
       await loadCredentials();
     } catch (err) {
-      setError(
+      setEditError(
         err.response?.data?.message ||
-        "Failed to delete credential"
+          "Failed to update credential"
       );
     } finally {
-      setWorkingId(null);
+      setEditSaving(false);
     }
   };
 
@@ -249,8 +251,7 @@ const CredentialCenter = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white py-3 rounded-xl disabled:
-            opacity-60"
+            className="w-full bg-black text-white py-3 rounded-xl disabled:opacity-60"
           >
             {loading
               ? "Uploading..."
@@ -264,7 +265,7 @@ const CredentialCenter = () => {
           My Credentials
         </h2>
         <p className="mt-2 text-gray-600">
-          Upload documents and request verification.
+          Upload documents and view verification results.
         </p>
         <div className="space-y-4 mt-6">
           {credentials.map((credential) => (
@@ -320,46 +321,36 @@ const CredentialCenter = () => {
     </div>
 )}
               <div className="flex flex-wrap gap-3 mt-5">
-                {(
-                  credential.verificationStatus ===
-                  "not_submitted" ||
-                  credential.verificationStatus ===
-                  "rejected"
-                ) && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleRequestVerification(
-                        credential._id
-                      )
-                    }
-                    disabled={
-                      workingId === credential._id
-                    }
-                    className="bg-black text-white px-4 py-2 rounded-xl
-                    disabled:opacity-60"
-                  >
-                    Request Verification
-                  </button>
-                )}
-                {credential.verificationStatus !==
-                  "pending" && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleDelete(
-                        credential._id
-                      )
-                    }
-                    disabled={
-                      workingId === credential._id
-                    }
-                    className="border px-4 py-2 rounded-xl disabled:
-                    opacity-60"
-                  >
-                    Delete
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleSeeResult(
+                      credential._id
+                    )
+                  }
+                  className="bg-black text-white px-4 py-2 rounded-xl"
+                >
+                  See Result
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    handleEditClick(credential)
+                  }
+                  disabled={
+                    credential.verificationStatus ===
+                    "pending"
+                  }
+                  title={
+                    credential.verificationStatus ===
+                    "pending"
+                      ? "Pending credentials cannot be edited"
+                      : "Edit this credential"
+                  }
+                  className="border px-4 py-2 rounded-xl disabled:opacity-60"
+                >
+                  Edit
+                </button>
               </div>
             </article>
           ))}
@@ -372,6 +363,16 @@ const CredentialCenter = () => {
         )}
       </section>
     </div>
+
+    {editingCredential && (
+      <CredentialEditModal
+        credential={editingCredential}
+        saving={editSaving}
+        error={editError}
+        onClose={() => setEditingCredential(null)}
+        onSave={handleSaveEdit}
+      />
+    )}
   </div>
   );
 };

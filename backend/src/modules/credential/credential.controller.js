@@ -10,6 +10,14 @@ const removeUploadedFile = (file) => {
   fs.unlink(file.path, () => {});
 };
 
+const deleteStoredFile = (filePath) => {
+  if (!filePath) {
+    return;
+  }
+
+  fs.unlink(filePath, () => {});
+};
+
 const uploadCredentialDocument = async (
   req,
   res
@@ -129,6 +137,162 @@ const getMyCredentials = async (
     return res.status(500).json({
       message:
         "Failed to load credentials",
+      error: error.message
+    });
+  }
+};
+
+const updateCredential = async (
+  req,
+  res
+) => {
+  try {
+    const credential =
+      await Credential.findById(
+        req.params.id
+      );
+
+    const previousFilePath =
+      credential?.document?.filePath;
+
+    if (!credential) {
+      return res.status(404).json({
+        message:
+          "Credential not found"
+      });
+    }
+
+    if (
+      credential.owner.toString() !==
+      req.user.id
+    ) {
+      return res.status(403).json({
+        message:
+          "You can only edit your own credential"
+      });
+    }
+
+    if (
+      credential.verificationStatus ===
+      "pending"
+    ) {
+      removeUploadedFile(req.file);
+      return res.status(400).json({
+        message:
+          "A credential with a pending verification request cannot be edited"
+      });
+    }
+
+    const {
+      credentialType,
+      title,
+      issuer = "",
+      description = "",
+      issuedDate = ""
+    } = req.body;
+
+    if (
+      credentialType &&
+      ![
+        "certificate",
+        "license",
+        "experience"
+      ].includes(credentialType)
+    ) {
+      removeUploadedFile(req.file);
+      return res.status(400).json({
+        message:
+          "Credential type must be certificate, license, or experience"
+      });
+    }
+
+    if (title !== undefined) {
+      if (!title.trim()) {
+        removeUploadedFile(req.file);
+        return res.status(400).json({
+          message:
+            "Credential title is required"
+        });
+      }
+
+      credential.title = title.trim();
+    }
+
+    if (credentialType) {
+      credential.credentialType =
+        credentialType;
+    }
+
+    credential.issuer = issuer.trim();
+    credential.description =
+      description.trim();
+
+    if (issuedDate) {
+      const parsedIssuedDate =
+        new Date(issuedDate);
+
+      if (
+        Number.isNaN(
+          parsedIssuedDate.getTime()
+        )
+      ) {
+        removeUploadedFile(req.file);
+        return res.status(400).json({
+          message:
+            "Issued date is invalid"
+        });
+      }
+
+      credential.issuedDate =
+        parsedIssuedDate;
+    } else {
+      credential.issuedDate = null;
+    }
+
+    if (req.file) {
+      credential.document = {
+        originalName:
+          req.file.originalname,
+        storedName:
+          req.file.filename,
+        mimeType:
+          req.file.mimetype,
+        filePath:
+          req.file.path,
+        fileSize:
+          req.file.size
+      };
+    }
+
+    credential.verificationStatus =
+      "not_submitted";
+    credential.verificationRequestedAt =
+      null;
+    credential.verifiedAt = null;
+    credential.verifiedByAdmin = "";
+    credential.rejectionReason = "";
+
+    await credential.save();
+
+    if (
+      req.file &&
+      previousFilePath &&
+      previousFilePath !==
+        credential.document.filePath
+    ) {
+      deleteStoredFile(previousFilePath);
+    }
+
+    return res.status(200).json({
+      message:
+        "Credential updated successfully",
+      credential
+    });
+  } catch (error) {
+    removeUploadedFile(req.file);
+    return res.status(500).json({
+      message:
+        "Failed to update credential",
       error: error.message
     });
   }
@@ -267,6 +431,7 @@ const deleteCredential = async (
 module.exports = {
   uploadCredentialDocument,
   getMyCredentials,
+  updateCredential,
   requestCredentialVerification,
   deleteCredential
 };

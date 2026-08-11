@@ -48,6 +48,7 @@ const WorkerProfileView = () => {
   }
 
   const profile = data.profile;
+  const credentials = data.allCredentials || [];
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
@@ -122,6 +123,61 @@ const WorkerProfileView = () => {
             )}
           </div>
         </div>
+
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold">
+            Credentials
+          </h2>
+          <div className="space-y-4 mt-4">
+            {credentials.map((credential) => (
+              <article
+                key={credential._id}
+                className="border rounded-2xl p-4"
+              >
+                <div className="flex flex-col md:flex-row md:justify-between gap-3">
+                  <div>
+                    <h3 className="font-semibold">
+                      {credential.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {credential.credentialType}
+                      {credential.issuer
+                        ? ` - ${credential.issuer}`
+                        : ""}
+                    </p>
+                    {credential.issuedDate && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Issued: {new Date(credential.issuedDate).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
+                  <span className="border rounded-full px-3 py-1 text-sm h-fit w-fit">
+                    {credential.verificationStatus}
+                  </span>
+                </div>
+
+                {credential.verificationStatus === "rejected" && credential.rejectionReason && (
+                  <p className="mt-3 text-sm text-red-700 bg-red-50 rounded-xl p-3">
+                    Rejected: {credential.rejectionReason}
+                  </p>
+                )}
+
+                {credential.verificationStatus === "pending" && (
+                  <p className="mt-3 text-sm text-yellow-700 bg-yellow-50 rounded-xl p-3">
+                    Awaiting admin review.
+                  </p>
+                )}
+              </article>
+            ))}
+          </div>
+
+          {credentials.length === 0 && (
+            <p className="text-gray-500 mt-3">
+              No credentials added yet.
+            </p>
+          )}
+        </div>
+
         <div className="mt-8">
           <h2 className="text-xl font-semibold">
             Completed Jobs ({data.completedJobCount})

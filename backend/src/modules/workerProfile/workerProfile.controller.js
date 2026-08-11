@@ -91,6 +91,17 @@ const buildProfileResponse = async (
       .sort({
         verifiedAt: -1
       });
+
+  const allCredentials =
+    await Credential.find({
+      owner: userId
+    })
+      .select(
+        "credentialType title issuer issuedDate verificationStatus verifiedAt rejectionReason verificationRequestedAt"
+      )
+      .sort({
+        createdAt: -1
+      });
   return {
     user: {
       _id: user._id,
@@ -106,7 +117,8 @@ const buildProfileResponse = async (
     completedJobs,
     completedJobCount:
       completedJobs.length,
-    verifiedCredentials
+    verifiedCredentials,
+    allCredentials
   };
 };
 const getMyProfile = async (

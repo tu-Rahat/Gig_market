@@ -62,6 +62,59 @@ export const uploadCredential = async ({
   return response.data;
 };
 
+export const updateCredential = async (
+  credentialId,
+  credentialData
+) => {
+  const hasReplacementFile =
+    credentialData?.document instanceof File;
+
+  if (hasReplacementFile) {
+    const formData = new FormData();
+    formData.append(
+      "credentialType",
+      credentialData.credentialType
+    );
+    formData.append(
+      "title",
+      credentialData.title
+    );
+    formData.append(
+      "issuer",
+      credentialData.issuer || ""
+    );
+    formData.append(
+      "description",
+      credentialData.description || ""
+    );
+    if (credentialData.issuedDate) {
+      formData.append(
+        "issuedDate",
+        credentialData.issuedDate
+      );
+    }
+    formData.append(
+      "document",
+      credentialData.document
+    );
+
+    const response = await api.patch(
+      `/credentials/${credentialId}`,
+      formData,
+      getAuthConfig()
+    );
+
+    return response.data;
+  }
+
+  const response = await api.patch(
+    `/credentials/${credentialId}`,
+    credentialData,
+    getAuthConfig()
+  );
+  return response.data;
+};
+
 export const requestVerification = async (
   credentialId
 ) => {

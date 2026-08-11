@@ -25,6 +25,7 @@ import MyAdvertisements from "../pages/MyAdvertisements";
 import BrowseTasks from "../pages/BrowseTasks";
 
 import Credentials from "../pages/Credentials";
+import VerificationResults from "../pages/VerificationResults";
 import CredentialBidderFilter from "../features/bidderFilter/CredentialBidderFilter";
 import ProfessionalProfile from "../features/workerProfile/ProfessionalProfile";
 import WorkerProfile from "../features/workerProfile/WorkerProfileView";
@@ -160,6 +161,15 @@ const AppRoutes = () => {
                     element={
                         <ProtectedRoute>
                             <Credentials />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/verification"
+                    element={
+                        <ProtectedRoute>
+                            <VerificationResults />
                         </ProtectedRoute>
                     }
                 />

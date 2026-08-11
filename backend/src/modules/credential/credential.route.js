@@ -8,6 +8,7 @@ const uploadCredential = require(
 const {
   uploadCredentialDocument,
   getMyCredentials,
+  updateCredential,
   requestCredentialVerification,
   deleteCredential
 } = require(
@@ -27,6 +28,13 @@ router.post(
   protect,
   uploadCredential.single("document"),
   uploadCredentialDocument
+);
+
+router.patch(
+  "/:id",
+  protect,
+  uploadCredential.single("document"),
+  updateCredential
 );
 
 router.patch(
