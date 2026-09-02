@@ -167,8 +167,108 @@ const getEscrowById = async (req, res) => {
  });
  }
 };
+
+// Feature 19: owner manually releases payment
+const releaseEscrowPayment = async (req, res) => {
+    try {
+
+        const escrow =
+            await Escrow.findById(
+                req.params.id
+            );
+
+        if (!escrow) {
+            return res.status(404).json({
+                message:
+                    "Escrow record not found"
+            });
+        }
+
+        // Only the task owner can release
+        // the payment.
+        if (
+            escrow.owner.toString() !==
+            req.user.id
+        ) {
+            return res.status(403).json({
+                message:
+                    "Only the task owner can release this payment"
+            });
+        }
+
+        // Payment must still be held.
+        if (
+            escrow.status !== "held"
+        ) {
+            return res.status(400).json({
+                message:
+                    "Payment is no longer held in escrow"
+            });
+        }
+
+        // Work must have reached the
+        // completed stage.
+        const task =
+            await Task.findById(
+                escrow.task
+            );
+
+        if (!task) {
+            return res.status(404).json({
+                message:
+                    "Associated task not found"
+            });
+        }
+
+        if (
+            task.status !== "completed"
+        ) {
+            return res.status(400).json({
+                message:
+                    "Payment can only be released after the task is completed"
+            });
+        }
+
+        escrow.status =
+            "released";
+
+        escrow.releasedAt =
+            new Date();
+
+        escrow.releaseReason =
+            "customer_approved";
+
+        await escrow.save();
+
+        return res.status(200).json({
+
+            message:
+                "Payment released successfully",
+
+            escrow
+
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+
+            message:
+                "Failed to release payment",
+
+            error:
+                error.message
+
+        });
+
+    }
+};
+
+
+
 module.exports = {
  createEscrowHold,
  getMyEscrows,
- getEscrowById
+ getEscrowById,
+ releaseEscrowPayment
 };

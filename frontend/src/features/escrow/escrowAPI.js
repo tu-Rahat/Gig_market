@@ -29,3 +29,15 @@ export const createEscrowHold = async (escrowData) => {
  );
  return response.data;
 };
+
+// Feature 19:
+// Owner manually releases payment
+export const releaseEscrowPayment = async (escrowId) => {
+    const response = await api.patch(
+        `/escrow/${escrowId}/release`,
+        {},
+        getAuthConfig()
+    );
+
+    return response.data;
+};

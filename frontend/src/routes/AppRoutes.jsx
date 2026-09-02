@@ -20,6 +20,7 @@ import Escrow from "../pages/Escrow";
 import TaskCountdown from "../pages/TaskCountdown";
 import WorkCompletion from "../pages/WorkCompletion";
 import OwnerApproval from "../pages/OwnerApproval";
+import AutoReleaseStatus from "../pages/AutoReleaseStatus";
 
 import MyAdvertisements from "../pages/MyAdvertisements";
 import BrowseTasks from "../pages/BrowseTasks";
@@ -258,7 +259,7 @@ const AppRoutes = () => {
                     path="/payments/auto-release"
                     element={
                         <ProtectedRoute>
-                            <FeaturePlaceholder />
+                            <AutoReleaseStatus />
                         </ProtectedRoute>
                     }
                 />

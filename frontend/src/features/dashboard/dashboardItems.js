@@ -168,7 +168,7 @@ export const dashboardSections = [
                 description:
                     "Track automatic payment release.",
                 path: "/payments/auto-release",
-                status: "coming",
+                status: "available",
             },
             {
                 number: 20,

@@ -57,6 +57,22 @@ const escrowSchema = new mongoose.Schema(
  type: Date,
  default: null
  },
+
+ approvalDeadline: {
+    type: Date,
+    default: null,
+    index: true
+},
+
+releaseReason: {
+    type: String,
+    enum: [
+        "customer_approved",
+        "automatic_24h_release"
+    ],
+    default: null
+},
+
  refundedAt: {
  type: Date,
  default: null
