@@ -10,6 +10,9 @@ const Escrow = require(
 const Credential = require(
   "../credential/credential.model"
 );
+const {
+  updateProviderBadges
+} = require("../badge/badge.service");
 
 const normalizeSkills = (skills) => {
   if (!Array.isArray(skills)) {
@@ -67,10 +70,12 @@ const getCompletedJobs = async (
 const buildProfileResponse = async (
   userId
 ) => {
+  await updateProviderBadges(userId);
+
   const user = await User.findById(
     userId
   ).select(
-    "name"
+    "name profileImage bio skills experience certifications rating completedJobs badges"
   );
   if (!user) {
     return null;
@@ -94,14 +99,26 @@ const buildProfileResponse = async (
   return {
     user: {
       _id: user._id,
-      name: user.name
+      name: user.name,
+      profileImage: user.profileImage || "",
+      bio: user.bio || "",
+      skills: user.skills || [],
+      experience: user.experience || "",
+      certifications: user.certifications || [],
+      badges: user.badges || [],
+      rating: user.rating || {
+        average: 0,
+        count: 0
+      },
+      completedJobs: user.completedJobs || 0
     },
     profile: profile || {
       owner: user._id,
       headline: "",
       bio: "",
       skills: [],
-      experience: []
+      experience: [],
+      portfolio: []
     },
     completedJobs,
     completedJobCount:
@@ -166,13 +183,21 @@ const saveMyProfile = async (
       headline = "",
       bio = "",
       skills = [],
-      experience = []
+      experience = [],
+      portfolio = []
     } = req.body;
 
     if (!Array.isArray(experience)) {
       return res.status(400).json({
         message:
           "Experience must be an array"
+      });
+    }
+
+    if (!Array.isArray(portfolio)) {
+      return res.status(400).json({
+        message:
+          "Portfolio must be an array"
       });
     }
 
@@ -208,6 +233,41 @@ const saveMyProfile = async (
             null
         }));
 
+    const cleanedPortfolio =
+      portfolio
+        .filter(
+          (item) =>
+            item &&
+            (
+              String(
+                item.title || ""
+              ).trim() ||
+              String(
+                item.description || ""
+              ).trim() ||
+              String(
+                item.imageUrl || ""
+              ).trim()
+            )
+        )
+        .slice(0, 20)
+        .map((item) => ({
+          title:
+            String(
+              item.title || ""
+            ).trim(),
+          description:
+            String(
+              item.description || ""
+            ).trim(),
+          imageUrl:
+            String(
+              item.imageUrl || ""
+            ).trim(),
+          completedAt:
+            item.completedAt || null
+        }));
+
     const profile =
       await WorkerProfile.findOneAndUpdate(
         {
@@ -222,7 +282,9 @@ const saveMyProfile = async (
           skills:
             normalizeSkills(skills),
           experience:
-            cleanedExperience
+            cleanedExperience,
+          portfolio:
+            cleanedPortfolio
         },
         {
           new: true,
@@ -245,8 +307,51 @@ const saveMyProfile = async (
   }
 };
 
+const getProviderPortfolio = async (
+  req,
+  res
+) => {
+  try {
+    const provider =
+      await User.findById(
+        req.params.userId
+      ).select(
+        "name profileImage bio skills experience certifications rating completedJobs badges portfolio"
+      );
+    if (!provider) {
+      return res.status(404).json({
+        message:
+          "Provider not found"
+      });
+    }
+    const verifiedCredentials =
+      await Credential.find({
+        owner: provider._id,
+        verificationStatus:
+          "verified"
+      })
+        .select(
+          "credentialType title issuer verifiedAt"
+        )
+        .sort({
+          verifiedAt: -1
+        });
+    return res.status(200).json({
+      provider,
+      verifiedCredentials
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message:
+        "Failed to load provider portfolio",
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getMyProfile,
   getPublicProfile,
-  saveMyProfile
+  saveMyProfile,
+  getProviderPortfolio
 };

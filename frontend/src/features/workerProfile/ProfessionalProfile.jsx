@@ -22,6 +22,8 @@ const ProfessionalProfile = () => {
     });
   const [completedJobs, setCompletedJobs] =
     useState([]);
+  const [badges, setBadges] =
+    useState([]);
   const [
     verifiedCredentials,
     setVerifiedCredentials
@@ -57,6 +59,9 @@ const ProfessionalProfile = () => {
       });
       setCompletedJobs(
         data.completedJobs || []
+      );
+      setBadges(
+        data.user?.badges || []
       );
       setVerifiedCredentials(
         data.verifiedCredentials ||
@@ -405,6 +410,26 @@ const ProfessionalProfile = () => {
               0 && (
               <p className="text-sm text-gray-500 mt-4">
                 No completed jobs yet.
+              </p>
+            )}
+          </section>
+          <section className="border rounded-3xl p-6">
+            <h2 className="text-xl font-semibold">
+              Badges
+            </h2>
+            <div className="flex flex-wrap gap-2 mt-5">
+              {(badges || []).map((badge) => (
+                <span
+                  key={badge._id || badge.type || badge.name}
+                  className="border rounded-full px-3 py-1 text-sm bg-amber-50 text-amber-800"
+                >
+                  {badge.name}
+                </span>
+              ))}
+            </div>
+            {(badges || []).length === 0 && (
+              <p className="text-sm text-gray-500 mt-4">
+                No badges earned yet.
               </p>
             )}
           </section>

@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import AdminLogin from
     "../pages/AdminLogin";
 
@@ -189,7 +189,7 @@ const AppRoutes = () => {
                     path="/reviews"
                     element={
                         <ProtectedRoute>
-                            <FeaturePlaceholder />
+                            <Navigate to="/jobs/approval" replace />
                         </ProtectedRoute>
                     }
                 />
@@ -198,7 +198,7 @@ const AppRoutes = () => {
                     path="/badges"
                     element={
                         <ProtectedRoute>
-                            <FeaturePlaceholder />
+                            <Navigate to="/profile/professional" replace />
                         </ProtectedRoute>
                     }
                 />

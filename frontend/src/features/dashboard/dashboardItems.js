@@ -103,16 +103,16 @@ export const dashboardSections = [
                 title: "Ratings & Reviews",
                 description:
                     "View and manage reputation feedback.",
-                path: "/reviews",
-                status: "coming",
+                path: "/jobs/approval",
+                status: "available",
             },
             {
                 number: 13,
                 title: "Badges",
                 description:
                     "View earned reputation and qualification badges.",
-                path: "/badges",
-                status: "coming",
+                path: "/profile/professional",
+                status: "available",
             },
             {
                 number: 14,

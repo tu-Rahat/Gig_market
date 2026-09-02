@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createReview } from "../review/reviewAPI";
 import {
  getOwnerPendingSubmissions,
  reviewCompletedWork
@@ -8,12 +9,18 @@ const OwnerApprovalCenter = () => {
  useState([]);
  const [rejectionReasons, setRejectionReasons] =
  useState({});
+ const [reviewDrafts, setReviewDrafts] =
+ useState({});
  const [workingId, setWorkingId] =
+ useState(null);
+ const [reviewingId, setReviewingId] =
  useState(null);
  const [error, setError] =
  useState("");
  const [message, setMessage] =
  useState("");
+ const [reviewMessages, setReviewMessages] =
+ useState({});
  const loadSubmissions = async () => {
  try {
  const data =
@@ -90,6 +97,48 @@ const OwnerApprovalCenter = () => {
  );
  } finally {
  setWorkingId(null);
+ }
+ };
+ const handleReviewSubmit = async (
+ submission
+ ) => {
+ const taskId = submission.task?._id;
+ if (!taskId) {
+ setError("Task information is missing for this review.");
+ return;
+ }
+ const rating =
+ reviewDrafts[submission._id]?.rating ?? 5;
+ const comment =
+ reviewDrafts[submission._id]?.comment || "";
+ try {
+ setReviewingId(submission._id);
+ setError("");
+ const data = await createReview(
+ taskId,
+ rating,
+ comment
+ );
+ setReviewMessages({
+ ...reviewMessages,
+ [submission._id]: data.message
+ });
+ setReviewDrafts({
+ ...reviewDrafts,
+ [submission._id]: {
+ rating: 5,
+ comment: ""
+ }
+ });
+ } catch (err) {
+ setReviewMessages({
+ ...reviewMessages,
+ [submission._id]:
+ err.response?.data?.message ||
+ "Failed to submit review"
+ });
+ } finally {
+ setReviewingId(null);
  }
  };
  return (
@@ -214,6 +263,87 @@ disabled:opacity-60"
  >
  Reject Work
  </button>
+
+ <div className="mt-6 border-t pt-4">
+ <h3 className="text-lg font-semibold">
+ Rate this Provider
+ </h3>
+ <select
+ value={
+ reviewDrafts[
+ submission._id
+ ]?.rating ?? 5
+ }
+ onChange={(event) =>
+ setReviewDrafts({
+ ...reviewDrafts,
+ [submission._id]: {
+ rating: Number(
+ event.target.value
+ ),
+ comment:
+ reviewDrafts[
+ submission._id
+ ]?.comment || ""
+ }
+ })
+ }
+ className="border rounded-xl p-3 mt-3 w-full"
+ >
+ <option value={5}>5 — Excellent</option>
+ <option value={4}>4 — Very Good</option>
+ <option value={3}>3 — Good</option>
+ <option value={2}>2 — Poor</option>
+ <option value={1}>1 — Very Poor</option>
+ </select>
+ <textarea
+ value={
+ reviewDrafts[
+ submission._id
+ ]?.comment || ""
+ }
+ onChange={(event) =>
+ setReviewDrafts({
+ ...reviewDrafts,
+ [submission._id]: {
+ rating:
+ reviewDrafts[
+ submission._id
+ ]?.rating ?? 5,
+ comment:
+ event.target.value
+ }
+ })
+ }
+ placeholder="Write your review..."
+ rows="4"
+ className="w-full border rounded-xl p-3 mt-4"
+ />
+ <button
+ type="button"
+ onClick={() =>
+ handleReviewSubmit(
+ submission
+ )
+ }
+ disabled={
+ reviewingId ===
+ submission._id
+ }
+ className="bg-black text-white px-5 py-3 rounded-xl mt-4 w-full disabled:opacity-60"
+ >
+ Submit Review
+ </button>
+ {reviewMessages[
+ submission._id
+ ] && (
+ <p className="mt-3 text-sm text-gray-700">
+ {reviewMessages[
+ submission._id
+ ]}
+ </p>
+ )}
+ </div>
  </div>
  </div>
  </article>

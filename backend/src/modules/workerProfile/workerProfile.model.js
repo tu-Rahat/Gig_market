@@ -67,6 +67,31 @@ const workerProfileSchema = new mongoose.Schema(
     experience: {
       type: [experienceSchema],
       default: []
+    },
+    portfolio: {
+      type: [
+        {
+          title: {
+            type: String,
+            trim: true,
+            maxlength: 150
+          },
+          description: {
+            type: String,
+            trim: true,
+            maxlength: 2000
+          },
+          imageUrl: {
+            type: String,
+            default: ""
+          },
+          completedAt: {
+            type: Date,
+            default: null
+          }
+        }
+      ],
+      default: []
     }
   },
   {
