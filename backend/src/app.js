@@ -28,6 +28,13 @@ const workSubmissionRoutes = require(
     "./modules/workSubmission/workSubmission.route"
 );
 
+const disputeRoutes = require(
+    "./modules/dispute/dispute.route"
+);
+const transactionRoutes = require(
+    "./modules/transaction/transaction.route"
+);
+
 const credentialRoutes = require(
     "./modules/credential/credential.route"
 );
@@ -61,40 +68,46 @@ app.use("/api/work-submissions",workSubmissionRoutes);
 app.use("/api/credentials",credentialRoutes);
 app.use("/api/worker-profiles",workerProfileRoutes);
 app.use("/api/bidder-filter",bidderFilterRoutes);
-app.use(
-    "/api/auth",
-    authRoutes
-);
+app.use("/api/transactions",transactionRoutes);
+// app.use(
+//     "/api/auth",
+//     authRoutes
+// );
+
+// app.use(
+//     "/api/categories",
+//     categoryRoutes
+// );
+
+// app.use(
+//     "/api/tasks",
+//     taskRoutes
+// );
+
+// app.use(
+//     "/api/escrow",
+//     escrowRoutes
+// );
+
+// app.use(
+//     "/api/countdowns",
+//     countdownRoutes
+// );
+
+// app.use(
+//     "/api/work-submissions",
+//     workSubmissionRoutes
+// );
 
 app.use(
-    "/api/categories",
-    categoryRoutes
+    "/api/disputes",
+    disputeRoutes
 );
 
-app.use(
-    "/api/tasks",
-    taskRoutes
-);
-
-app.use(
-    "/api/escrow",
-    escrowRoutes
-);
-
-app.use(
-    "/api/countdowns",
-    countdownRoutes
-);
-
-app.use(
-    "/api/work-submissions",
-    workSubmissionRoutes
-);
-
-app.use(
-    "/api/credentials",
-    credentialRoutes
-);
+// app.use(
+//     "/api/credentials",
+//     credentialRoutes
+// );
 
 app.use(
     "/api/bids",

@@ -279,7 +279,37 @@ const AdminDashboard = () => {
 
             )}
 
+            <div className="mt-8 border rounded-3xl p-6">
 
+    <div className="flex justify-between items-center gap-4">
+
+        <div>
+            <h2 className="text-xl font-bold">
+                Dispute Management
+            </h2>
+
+            <p className="mt-2 text-gray-600">
+                Review customer and provider disputes.
+            </p>
+        </div>
+
+        <span className="border rounded-full px-3 py-1 text-sm">
+            Feature 20
+        </span>
+
+    </div>
+
+    <button
+        type="button"
+        onClick={() =>
+            navigate("/admin/disputes")
+        }
+        className="mt-5 bg-black text-white px-5 py-3 rounded-xl"
+    >
+        Review Disputes →
+    </button>
+
+</div>
             <div className="space-y-5 mt-8">
 
 
