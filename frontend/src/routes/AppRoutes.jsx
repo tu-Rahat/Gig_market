@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import AdminLogin from
     "../pages/AdminLogin";
-
+import AdminDisputes from "../pages/AdminDisputes";
 import AdminDashboard from
     "../pages/AdminDashboard";
 import FeaturePlaceholder from "../pages/FeaturePlaceholder";
@@ -20,6 +20,9 @@ import Escrow from "../pages/Escrow";
 import TaskCountdown from "../pages/TaskCountdown";
 import WorkCompletion from "../pages/WorkCompletion";
 import OwnerApproval from "../pages/OwnerApproval";
+import AutoReleaseStatus from "../pages/AutoReleaseStatus";
+import Disputes from "../pages/Disputes";
+import Transactions from "../pages/Transactions";
 
 import MyAdvertisements from "../pages/MyAdvertisements";
 import BrowseTasks from "../pages/BrowseTasks";
@@ -53,6 +56,13 @@ const AppRoutes = () => {
                     path="/admin"
                     element={
                         <AdminDashboard />
+                    }
+                />
+
+                <Route
+                    path="/admin/disputes"
+                    element={
+                        <AdminDisputes />
                     }
                 />
 
@@ -258,7 +268,7 @@ const AppRoutes = () => {
                     path="/payments/auto-release"
                     element={
                         <ProtectedRoute>
-                            <FeaturePlaceholder />
+                            <AutoReleaseStatus />
                         </ProtectedRoute>
                     }
                 />
@@ -267,7 +277,7 @@ const AppRoutes = () => {
                     path="/disputes"
                     element={
                         <ProtectedRoute>
-                            <FeaturePlaceholder />
+                            <Disputes />
                         </ProtectedRoute>
                     }
                 />
@@ -276,7 +286,7 @@ const AppRoutes = () => {
                     path="/transactions"
                     element={
                         <ProtectedRoute>
-                            <FeaturePlaceholder />
+                            <Transactions />
                         </ProtectedRoute>
                     }
                 />

@@ -168,7 +168,7 @@ export const dashboardSections = [
                 description:
                     "Track automatic payment release.",
                 path: "/payments/auto-release",
-                status: "coming",
+                status: "available",
             },
             {
                 number: 20,
@@ -176,7 +176,7 @@ export const dashboardSections = [
                 description:
                     "Raise disputes and submit supporting evidence.",
                 path: "/disputes",
-                status: "coming",
+                status: "available",
             },
             {
                 number: 21,
@@ -184,7 +184,7 @@ export const dashboardSections = [
                 description:
                     "View earnings, spending, and transaction history.",
                 path: "/transactions",
-                status: "coming",
+                status: "available",
             },
         ],
     },

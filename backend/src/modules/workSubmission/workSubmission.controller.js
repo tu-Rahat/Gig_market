@@ -327,26 +327,56 @@ const reviewCompletedWork = async (req, res) => {
  "Work can only be reviewed while escrow is held"
  });
  }
- if (decision === "approve") {
- submission.status = "approved";
- submission.rejectionReason = "";
- submission.reviewedAt = new Date();
- await submission.save();
- const task = await Task.findById(
- submission.task
- );
- if (task) {
- task.status = "completed";
- await task.save();
- }
- return res.status(200).json({
- message:
- "Completed work approved successfully",
- submission,
- paymentStatus:
- "Escrow remains held until payment release logic runs"
- });
- }
+if (decision === "approve") {
+
+    submission.status = "approved";
+
+    submission.rejectionReason = "";
+
+    submission.reviewedAt = new Date();
+
+    await submission.save();
+
+    const task = await Task.findById(
+        submission.task
+    );
+
+    if (task) {
+
+        task.status = "completed";
+
+        await task.save();
+
+    }
+
+    const completedAt =
+        new Date();
+
+    const approvalDeadline =
+        new Date(
+            completedAt.getTime() +
+            24 * 60 * 60 * 1000
+        );
+
+    escrow.approvalDeadline =
+        approvalDeadline;
+
+    await escrow.save();
+
+    return res.status(200).json({
+
+        message:
+            "Completed work approved successfully",
+
+        submission,
+
+        paymentStatus:
+            "Escrow remains held until payment release logic runs",
+
+        approvalDeadline
+
+    });
+}
  submission.status = "rejected";
  submission.rejectionReason =
  rejectionReason.trim();

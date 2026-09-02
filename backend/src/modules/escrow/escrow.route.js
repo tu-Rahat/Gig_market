@@ -3,7 +3,8 @@ const protect = require("../../middleware/authMiddleware");
 const {
  createEscrowHold,
  getMyEscrows,
- getEscrowById
+ getEscrowById,
+ releaseEscrowPayment
 } = require("./escrow.controller");
 const router = express.Router();
 router.get(
@@ -20,5 +21,12 @@ router.post(
  "/hold",
  protect,
  createEscrowHold
+); 
+
+router.patch(
+    "/:id/release",
+    protect,
+    releaseEscrowPayment
 );
+
 module.exports = router;
