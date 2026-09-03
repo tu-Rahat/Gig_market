@@ -11,6 +11,7 @@ const BrowseTasks = () => {
     const [tasks, setTasks] = useState([]);
     const [summaries, setSummaries] = useState({});
     const [bidAmounts, setBidAmounts] = useState({});
+    const [completionTimes, setCompletionTimes] = useState({});
     const [messages, setMessages] = useState({});
     const [workingTaskId, setWorkingTaskId] = useState(null);
     const [error, setError] = useState("");
@@ -33,7 +34,7 @@ const BrowseTasks = () => {
                     [taskId]: data.myBid.amount
                 }));
             }
-        } catch (err) {
+        } catch {
             // Do not break the whole marketplace
             // if one summary request fails.
         }
@@ -59,7 +60,9 @@ const BrowseTasks = () => {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadTasks();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleBid = async (taskId) => {
@@ -82,7 +85,9 @@ const BrowseTasks = () => {
                 taskId,
                 {
                     amount,
-                    message: messages[taskId] || ""
+                    message: messages[taskId] || "",
+                    estimatedCompletionTime:
+                        Number(completionTimes[taskId] || 0)
                 }
             );
 
@@ -210,6 +215,21 @@ const BrowseTasks = () => {
                                         })
                                     }
                                     placeholder="Optional message to the task owner"
+                                    className="w-full border rounded-xl p-3"
+                                />
+
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="1"
+                                    value={completionTimes[task._id] ?? ""}
+                                    onChange={(event) =>
+                                        setCompletionTimes({
+                                            ...completionTimes,
+                                            [task._id]: event.target.value
+                                        })
+                                    }
+                                    placeholder="Estimated completion (hours)"
                                     className="w-full border rounded-xl p-3"
                                 />
 

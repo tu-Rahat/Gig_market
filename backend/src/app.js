@@ -49,7 +49,11 @@ const bidderFilterRoutes = require(
  "./modules/bidderFilter/bidderFilter.route"
 );
 const reviewRoutes = require(
- "./modules/review/review.route"
+    "./modules/review/review.route"
+);
+
+const providerRoutes = require(
+    "./modules/provider/provider.route"
 );
 
 const app = express();
@@ -70,6 +74,11 @@ app.use("/api/work-submissions",workSubmissionRoutes);
 app.use("/api/credentials",credentialRoutes);
 app.use("/api/worker-profiles",workerProfileRoutes);
 app.use("/api/bidder-filter",bidderFilterRoutes);
+app.use(
+    "/api/providers",
+    providerRoutes
+);
+
 app.use(
     "/api/transactions",
     transactionRoutes

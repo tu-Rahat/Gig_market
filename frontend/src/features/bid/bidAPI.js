@@ -14,3 +14,16 @@ export const getOwnerTaskBids = async (taskId) => {
     const response = await api.get(`/bids/task/${taskId}/owner`);
     return response.data;
 };
+
+export const getTaskQuotes = async (taskId) => {
+    const response = await api.get(`/bids/task/${taskId}/quotes`);
+    return response.data;
+};
+
+export const selectProvider = async (taskId, bidId) => {
+    const response = await api.patch(
+        `/bids/task/${taskId}/select/${bidId}`,
+        {}
+    );
+    return response.data;
+};

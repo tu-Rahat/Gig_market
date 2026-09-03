@@ -7,6 +7,7 @@ import {
 import {
     getCategories
 } from "../category/categoryAPI";
+import { Link } from "react-router-dom";
 
 const emptyForm = {
     title: "",
@@ -46,6 +47,7 @@ const MyAdvertisements = () => {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadData();
     }, []);
 
@@ -194,6 +196,12 @@ const MyAdvertisements = () => {
 
                             {task.status === "open" && (
                                 <div className="flex gap-3 h-fit">
+                                    <Link
+                                        to={`/tasks/${task._id}/quotes`}
+                                        className="border px-4 py-2 rounded-xl"
+                                    >
+                                        Compare Quotes
+                                    </Link>
                                     <button
                                         type="button"
                                         onClick={() =>

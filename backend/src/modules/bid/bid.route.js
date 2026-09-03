@@ -3,7 +3,9 @@ const protect = require("../../middleware/authMiddleware");
 const {
     submitOrLowerBid,
     getBidSummary,
-    getOwnerTaskBids
+    getOwnerTaskBids,
+    getTaskQuotes,
+    selectProvider
 } = require("./bid.controller");
 
 const router = express.Router();
@@ -17,5 +19,13 @@ router.get("/task/:taskId/summary", protect, getBidSummary);
 // Owner sees active bids for their own task.
 // Useful foundation for Feature 7.
 router.get("/task/:taskId/owner", protect, getOwnerTaskBids);
+
+router.get("/task/:taskId/quotes", protect, getTaskQuotes);
+
+router.patch(
+    "/task/:taskId/select/:bidId",
+    protect,
+    selectProvider
+);
 
 module.exports = router;

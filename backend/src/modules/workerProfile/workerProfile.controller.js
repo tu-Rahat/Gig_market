@@ -75,7 +75,7 @@ const buildProfileResponse = async (
   const user = await User.findById(
     userId
   ).select(
-    "name profileImage bio skills experience certifications rating completedJobs badges"
+    "name profileImage bio skills experience certifications rating completedJobs badges location isAvailable"
   );
   if (!user) {
     return null;
@@ -110,7 +110,9 @@ const buildProfileResponse = async (
         average: 0,
         count: 0
       },
-      completedJobs: user.completedJobs || 0
+      completedJobs: user.completedJobs || 0,
+      location: user.location,
+      isAvailable: user.isAvailable
     },
     profile: profile || {
       owner: user._id,
@@ -184,8 +186,26 @@ const saveMyProfile = async (
       bio = "",
       skills = [],
       experience = [],
-      portfolio = []
+      portfolio = [],
+      location = {},
+      isAvailable = true
     } = req.body;
+
+    const latitude = Number(location.latitude);
+    const longitude = Number(location.longitude);
+    const hasLocation =
+      location.latitude !== undefined ||
+      location.longitude !== undefined;
+
+    if (
+      hasLocation &&
+      (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 ||
+        !Number.isFinite(longitude) || longitude < -180 || longitude > 180)
+    ) {
+      return res.status(400).json({
+        message: "Location coordinates are invalid"
+      });
+    }
 
     if (!Array.isArray(experience)) {
       return res.status(400).json({
@@ -292,6 +312,17 @@ const saveMyProfile = async (
           runValidators: true
         }
       );
+
+    await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        location: hasLocation
+          ? { latitude, longitude }
+          : undefined,
+        isAvailable: Boolean(isAvailable)
+      },
+      { runValidators: true }
+    );
 
     return res.status(200).json({
       message:
