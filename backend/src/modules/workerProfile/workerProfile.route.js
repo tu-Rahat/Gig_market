@@ -5,7 +5,8 @@ const protect = require(
 const {
   getMyProfile,
   getPublicProfile,
-  saveMyProfile
+  saveMyProfile,
+  getProviderPortfolio
 } = require(
   "./workerProfile.controller"
 );
@@ -24,11 +25,14 @@ router.put(
   saveMyProfile
 );
 
-// Public showcase route.
-// Keep this after /mine.
 router.get(
   "/:userId",
   getPublicProfile
+);
+
+router.get(
+ "/:userId/portfolio",
+ getProviderPortfolio
 );
 
 module.exports = router;

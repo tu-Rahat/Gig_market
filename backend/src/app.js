@@ -48,7 +48,9 @@ const workerProfileRoutes = require(
 const bidderFilterRoutes = require(
  "./modules/bidderFilter/bidderFilter.route"
 );
-
+const reviewRoutes = require(
+ "./modules/review/review.route"
+);
 
 const app = express();
 
@@ -68,37 +70,15 @@ app.use("/api/work-submissions",workSubmissionRoutes);
 app.use("/api/credentials",credentialRoutes);
 app.use("/api/worker-profiles",workerProfileRoutes);
 app.use("/api/bidder-filter",bidderFilterRoutes);
-app.use("/api/transactions",transactionRoutes);
-// app.use(
-//     "/api/auth",
-//     authRoutes
-// );
+app.use(
+    "/api/transactions",
+    transactionRoutes
+);
 
-// app.use(
-//     "/api/categories",
-//     categoryRoutes
-// );
-
-// app.use(
-//     "/api/tasks",
-//     taskRoutes
-// );
-
-// app.use(
-//     "/api/escrow",
-//     escrowRoutes
-// );
-
-// app.use(
-//     "/api/countdowns",
-//     countdownRoutes
-// );
-
-// app.use(
-//     "/api/work-submissions",
-//     workSubmissionRoutes
-// );
-
+app.use(
+    "/api/reviews",
+    reviewRoutes
+);
 app.use(
     "/api/disputes",
     disputeRoutes

@@ -3,6 +3,9 @@ const jwt = require("jsonwebtoken");
 const Credential = require(
     "../credential/credential.model"
 );
+const {
+    updateProviderBadges
+} = require("../badge/badge.service");
 
 
 const adminLogin = async (req, res) => {
@@ -154,6 +157,9 @@ const approveCredential = async (
         }
 
         await credential.save();
+        await updateProviderBadges(
+            credential.owner
+        );
 
         return res.status(200).json({
             message:

@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import AdminLogin from
     "../pages/AdminLogin";
 import AdminDisputes from "../pages/AdminDisputes";
@@ -31,7 +31,8 @@ import Credentials from "../pages/Credentials";
 import CredentialBidderFilter from "../features/bidderFilter/CredentialBidderFilter";
 import ProfessionalProfile from "../features/workerProfile/ProfessionalProfile";
 import WorkerProfile from "../features/workerProfile/WorkerProfileView";
-
+import Reviews from "../pages/Reviews";
+import BidderComparison from "../pages/BidderComparison";
 import ProtectedRoute from "../features/auth/ProtectedRoute";
 
 
@@ -199,7 +200,7 @@ const AppRoutes = () => {
                     path="/reviews"
                     element={
                         <ProtectedRoute>
-                            <FeaturePlaceholder />
+                            <Reviews />
                         </ProtectedRoute>
                     }
                 />
@@ -208,7 +209,7 @@ const AppRoutes = () => {
                     path="/badges"
                     element={
                         <ProtectedRoute>
-                            <FeaturePlaceholder />
+                            <Navigate to="/profile/professional" replace />
                         </ProtectedRoute>
                     }
                 />
@@ -217,7 +218,7 @@ const AppRoutes = () => {
                     path="/bidders/compare"
                     element={
                         <ProtectedRoute>
-                            <FeaturePlaceholder />
+                            <BidderComparison />
                         </ProtectedRoute>
                     }
                 />

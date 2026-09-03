@@ -37,6 +37,11 @@ export const getWorkerProfile =
     );
     return response.data;
   };
-
-// explicit named re-exports (compatibility)
-// (no-op) functions are already exported above
+export const getProviderPortfolio =
+  async (userId) => {
+    const response =
+      await api.get(
+        `/worker-profiles/${userId}/portfolio`
+      );
+    return response.data;
+  };

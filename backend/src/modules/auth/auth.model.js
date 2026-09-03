@@ -47,6 +47,29 @@ const userSchema = new mongoose.Schema(
             default: []
         },
 
+        badges: {
+            type: [
+                {
+                    type: {
+                        type: String,
+                        enum: [
+                            "verified_provider",
+                            "top_rated",
+                            "expert_professional"
+                        ]
+                    },
+                    name: {
+                        type: String
+                    },
+                    awardedAt: {
+                        type: Date,
+                        default: Date.now
+                    }
+                }
+            ],
+            default: []
+        },
+
         rating: {
             average: {
                 type: Number,

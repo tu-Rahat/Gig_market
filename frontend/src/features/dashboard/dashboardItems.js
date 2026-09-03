@@ -104,15 +104,15 @@ export const dashboardSections = [
                 description:
                     "View and manage reputation feedback.",
                 path: "/reviews",
-                status: "coming",
+                status: "available",
             },
             {
                 number: 13,
                 title: "Badges",
                 description:
                     "View earned reputation and qualification badges.",
-                path: "/badges",
-                status: "coming",
+                path: "/profile/professional",
+                status: "available",
             },
             {
                 number: 14,
@@ -120,7 +120,7 @@ export const dashboardSections = [
                 description:
                     "Compare bids, ratings, experience, and credentials.",
                 path: "/bidders/compare",
-                status: "coming",
+                status: "available",
             },
         ],
     },
