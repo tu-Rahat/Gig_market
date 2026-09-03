@@ -14,6 +14,15 @@ export const getMyEscrows = async () => {
  );
  return response.data;
 };
+
+export const getEligibleEscrowTasks = async () => {
+    const response = await api.get(
+        "/escrow/eligible-tasks",
+        getAuthConfig()
+    );
+    return response.data;
+};
+
 export const getEscrowById = async (escrowId) => {
  const response = await api.get(
  `/escrow/${escrowId}`,

@@ -12,22 +12,21 @@ const createPaymentReference = () => {
 const createEscrowHold = async (req, res) => {
  try {
  const {
- taskId,
- selectedWorkerId,
- amount,
- completionDeadline
- } = req.body;
- if (
- !taskId ||
- !selectedWorkerId ||
- amount === undefined ||
- !completionDeadline
- ) {
- return res.status(400).json({
- message:
- "Task, selected worker, amount, and completion deadline are required"
- });
- }
+    taskId,
+    amount,
+    completionDeadline
+} = req.body;
+
+if (
+    !taskId ||
+    amount === undefined ||
+    !completionDeadline
+) {
+    return res.status(400).json({
+        message:
+            "Task, amount, and completion deadline are required"
+    });
+}
  const numericAmount = Number(amount);
  if (
  Number.isNaN(numericAmount) ||
@@ -54,12 +53,14 @@ const createEscrowHold = async (req, res) => {
  message: "Task not found"
  });
  }
- if (task.createdBy.toString() !== req.user.id) {
- return res.status(403).json({
- message:
- "Only the task owner can create the escrow hold"
- });
- }
+if (!task.selectedWorker) {
+    return res.status(400).json({
+        message:
+            "Please select a provider before creating the escrow"
+    });
+}
+
+const selectedWorkerId = task.selectedWorker.toString();
  if (selectedWorkerId === req.user.id) {
  return res.status(400).json({
  message:
@@ -112,6 +113,29 @@ const createEscrowHold = async (req, res) => {
  }
 };
 // Supporting endpoint: escrow records involving logged-in user
+// Get tasks owned by the logged-in user that have a selected worker
+const getEligibleEscrowTasks = async (req, res) => {
+    try {
+        const tasks = await Task.find({
+            createdBy: req.user.id,
+            selectedWorker: { $ne: null },
+            bookingStatus: "confirmed"
+        })
+            .populate("selectedWorker", "name email rating completedJobs")
+            .populate("category", "name")
+            .sort({ updatedAt: -1 });
+
+        return res.status(200).json({
+            tasks
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: "Failed to load eligible escrow tasks",
+            error: error.message
+        });
+    }
+};
+
 const getMyEscrows = async (req, res) => {
  try {
  const escrows = await Escrow.find({
@@ -267,8 +291,9 @@ const releaseEscrowPayment = async (req, res) => {
 
 
 module.exports = {
- createEscrowHold,
- getMyEscrows,
- getEscrowById,
- releaseEscrowPayment
+    createEscrowHold,
+    getEligibleEscrowTasks,
+    getMyEscrows,
+    getEscrowById,
+    releaseEscrowPayment
 };

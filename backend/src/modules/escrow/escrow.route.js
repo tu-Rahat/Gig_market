@@ -1,16 +1,22 @@
 const express = require("express");
 const protect = require("../../middleware/authMiddleware");
 const {
- createEscrowHold,
- getMyEscrows,
- getEscrowById,
- releaseEscrowPayment
+    createEscrowHold,
+    getEligibleEscrowTasks,
+    getMyEscrows,
+    getEscrowById,
+    releaseEscrowPayment
 } = require("./escrow.controller");
 const router = express.Router();
 router.get(
  "/mine",
  protect,
  getMyEscrows
+);
+router.get(
+    "/eligible-tasks",
+    protect,
+    getEligibleEscrowTasks
 );
 router.get(
  "/:id",

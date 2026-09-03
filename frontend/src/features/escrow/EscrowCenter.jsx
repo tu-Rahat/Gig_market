@@ -1,17 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
- createEscrowHold,
- getMyEscrows
+    createEscrowHold,
+    getEligibleEscrowTasks,
+    getMyEscrows
 } from "./escrowAPI";
 const EscrowCenter = () => {
  const [escrows, setEscrows] = useState([]);
+ const [eligibleTasks, setEligibleTasks] = useState([]);
  const [formData, setFormData] = useState({
- taskId: "",
- selectedWorkerId: "",
- amount: "",
- completionDeadline: ""
- });
+    taskId: "",
+    amount: "",
+    completionDeadline: ""
+});
  const [loading, setLoading] = useState(false);
  const [error, setError] = useState("");
  const [message, setMessage] = useState("");
@@ -26,10 +27,30 @@ const EscrowCenter = () => {
  );
  }
  };
+ const loadEligibleTasks = async () => {
+    try {
+        const data = await getEligibleEscrowTasks();
+
+        setEligibleTasks(data.tasks || []);
+    } catch (err) {
+        setError(
+            err.response?.data?.message ||
+            "Failed to load eligible tasks"
+        );
+    }
+};
+	const selectedTask = eligibleTasks.find(
+    (task) => task._id === formData.taskId
+);
+
 	useEffect(() => {
-	// eslint-disable-next-line react-hooks/set-state-in-effect
-	loadEscrows();
-	}, []);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadEscrows();
+
+    // Load tasks where the owner has already selected a provider
+    // through Feature 7.
+    loadEligibleTasks();
+}, []);
  const handleChange = (event) => {
  setFormData({
  ...formData,
@@ -43,16 +64,16 @@ const EscrowCenter = () => {
  try {
  setLoading(true);
  const data = await createEscrowHold({
- ...formData,
- amount: Number(formData.amount)
- });
+    taskId: formData.taskId,
+    amount: Number(formData.amount),
+    completionDeadline: formData.completionDeadline
+});
  setMessage(data.message);
  setFormData({
- taskId: "",
- selectedWorkerId: "",
- amount: "",
- completionDeadline: ""
- });
+    taskId: "",
+    amount: "",
+    completionDeadline: ""
+});
  await loadEscrows();
  } catch (err) {
  setError(
@@ -74,11 +95,7 @@ const EscrowCenter = () => {
  <p className="mt-2 text-gray-600">
  Simulate holding payment after selecting a worker.
  </p>
- <div className="mt-4 p-3 rounded-xl bg-amber-50 text-amber-800 text-sm">
- Temporary integration form: until Worker Selection is
- implemented, enter the Task ID and selected Worker ID
- manually. Feature 7 can later call the same API.
- </div>
+ 
  {error && (
  <div className="mt-4 p-3 rounded-xl bg-red-50 text-red-700">
  {error}
@@ -94,33 +111,61 @@ const EscrowCenter = () => {
  className="mt-6 space-y-4"
  >
  <div>
- <label className="block text-sm font-medium mb-2">
- Task ID
- </label>
- <input
- type="text"
- name="taskId"
- value={formData.taskId}
- onChange={handleChange}
- placeholder="MongoDB task ID"
- className="w-full border rounded-xl p-3 outline-none focus:ring2 focus:ring-black"
- required
- />
- </div>
- <div>
- <label className="block text-sm font-medium mb-2">
- Selected Worker ID
- </label>
- <input
- type="text"
- name="selectedWorkerId"
- value={formData.selectedWorkerId}
- onChange={handleChange}
- placeholder="MongoDB user ID"
- className="w-full border rounded-xl p-3 outline-none focus:ring2 focus:ring-black"
- required
- />
- </div>
+    <label className="block text-sm font-medium mb-2">
+        Select Task
+    </label>
+
+    <select
+        name="taskId"
+        value={formData.taskId}
+        onChange={handleChange}
+        className="w-full border rounded-xl p-3 bg-white outline-none focus:ring-2 focus:ring-black"
+        required
+    >
+        <option value="">
+            Select a task
+        </option>
+
+        {eligibleTasks.map((task) => (
+            <option
+                key={task._id}
+                value={task._id}
+            >
+                {task.title}
+            </option>
+        ))}
+    </select>
+</div>
+ {selectedTask?.selectedWorker && (
+    <div>
+        <label className="block text-sm font-medium mb-2">
+            Selected Provider
+        </label>
+
+        <div className="w-full border rounded-xl p-3 bg-gray-50">
+            <p className="font-medium">
+                {selectedTask.selectedWorker.name ||
+                    "Selected Provider"}
+            </p>
+
+            {selectedTask.selectedWorker.email && (
+                <p className="text-sm text-gray-500 mt-1">
+                    {selectedTask.selectedWorker.email}
+                </p>
+            )}
+
+            <p className="text-xs text-gray-500 mt-2">
+                Provider selected through Feature 7
+            </p>
+        </div>
+    </div>
+)}
+{formData.taskId && !selectedTask?.selectedWorker && (
+    <div className="p-3 rounded-xl bg-amber-50 text-amber-800 text-sm">
+        This task does not have a selected provider yet.
+        Please select a provider through the bidding workflow first.
+    </div>
+)}
  <div>
  <label className="block text-sm font-medium mb-2">
  Amount (BDT)
