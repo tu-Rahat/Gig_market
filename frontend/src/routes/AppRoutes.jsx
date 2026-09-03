@@ -28,7 +28,8 @@ import Credentials from "../pages/Credentials";
 import CredentialBidderFilter from "../features/bidderFilter/CredentialBidderFilter";
 import ProfessionalProfile from "../features/workerProfile/ProfessionalProfile";
 import WorkerProfile from "../features/workerProfile/WorkerProfileView";
-
+import Reviews from "../pages/Reviews";
+import BidderComparison from "../pages/BidderComparison";
 import ProtectedRoute from "../features/auth/ProtectedRoute";
 
 
@@ -189,7 +190,7 @@ const AppRoutes = () => {
                     path="/reviews"
                     element={
                         <ProtectedRoute>
-                            <Navigate to="/jobs/approval" replace />
+                            <Reviews />
                         </ProtectedRoute>
                     }
                 />
@@ -207,7 +208,7 @@ const AppRoutes = () => {
                     path="/bidders/compare"
                     element={
                         <ProtectedRoute>
-                            <FeaturePlaceholder />
+                            <BidderComparison />
                         </ProtectedRoute>
                     }
                 />

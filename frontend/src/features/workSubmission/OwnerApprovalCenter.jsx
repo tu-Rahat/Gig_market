@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createReview } from "../review/reviewAPI";
+// import { createReview } from "../review/reviewAPI";
 import {
  getOwnerPendingSubmissions,
  reviewCompletedWork
@@ -9,18 +9,18 @@ const OwnerApprovalCenter = () => {
  useState([]);
  const [rejectionReasons, setRejectionReasons] =
  useState({});
- const [reviewDrafts, setReviewDrafts] =
- useState({});
+//  const [reviewDrafts, setReviewDrafts] =
+//  useState({});
  const [workingId, setWorkingId] =
  useState(null);
- const [reviewingId, setReviewingId] =
- useState(null);
+//  const [reviewingId, setReviewingId] =
+//  useState(null);
  const [error, setError] =
  useState("");
  const [message, setMessage] =
  useState("");
- const [reviewMessages, setReviewMessages] =
- useState({});
+//  const [reviewMessages, setReviewMessages] =
+//  useState({});
  const loadSubmissions = async () => {
  try {
  const data =
@@ -99,48 +99,48 @@ const OwnerApprovalCenter = () => {
  setWorkingId(null);
  }
  };
- const handleReviewSubmit = async (
- submission
- ) => {
- const taskId = submission.task?._id;
- if (!taskId) {
- setError("Task information is missing for this review.");
- return;
- }
- const rating =
- reviewDrafts[submission._id]?.rating ?? 5;
- const comment =
- reviewDrafts[submission._id]?.comment || "";
- try {
- setReviewingId(submission._id);
- setError("");
- const data = await createReview(
- taskId,
- rating,
- comment
- );
- setReviewMessages({
- ...reviewMessages,
- [submission._id]: data.message
- });
- setReviewDrafts({
- ...reviewDrafts,
- [submission._id]: {
- rating: 5,
- comment: ""
- }
- });
- } catch (err) {
- setReviewMessages({
- ...reviewMessages,
- [submission._id]:
- err.response?.data?.message ||
- "Failed to submit review"
- });
- } finally {
- setReviewingId(null);
- }
- };
+//  const handleReviewSubmit = async (
+//  submission
+//  ) => {
+//  const taskId = submission.task?._id;
+//  if (!taskId) {
+//  setError("Task information is missing for this review.");
+//  return;
+//  }
+//  const rating =
+//  reviewDrafts[submission._id]?.rating ?? 5;
+//  const comment =
+//  reviewDrafts[submission._id]?.comment || "";
+//  try {
+//  setReviewingId(submission._id);
+//  setError("");
+//  const data = await createReview(
+//  taskId,
+//  rating,
+//  comment
+//  );
+//  setReviewMessages({
+//  ...reviewMessages,
+//  [submission._id]: data.message
+//  });
+//  setReviewDrafts({
+//  ...reviewDrafts,
+//  [submission._id]: {
+//  rating: 5,
+//  comment: ""
+//  }
+//  });
+//  } catch (err) {
+//  setReviewMessages({
+//  ...reviewMessages,
+//  [submission._id]:
+//  err.response?.data?.message ||
+//  "Failed to submit review"
+//  });
+//  } finally {
+//  setReviewingId(null);
+//  }
+//  };
  return (
  <div className="max-w-6xl mx-auto px-6 py-12">
  <div>
@@ -264,7 +264,7 @@ disabled:opacity-60"
  Reject Work
  </button>
 
- <div className="mt-6 border-t pt-4">
+ {/* <div className="mt-6 border-t pt-4">
  <h3 className="text-lg font-semibold">
  Rate this Provider
  </h3>
@@ -343,7 +343,7 @@ disabled:opacity-60"
  ]}
  </p>
  )}
- </div>
+ </div> */}
  </div>
  </div>
  </article>

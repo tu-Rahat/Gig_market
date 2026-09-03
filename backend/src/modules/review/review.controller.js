@@ -2,6 +2,9 @@ const Review = require("./review.model");
 const Task = require("../task/task.model");
 const Escrow = require("../escrow/escrow.model");
 const User = require("../auth/auth.model");
+const WorkSubmission = require(
+    "../workSubmission/workSubmission.model"
+);
 const {
   updateProviderBadges
 } = require("../badge/badge.service");
@@ -62,11 +65,38 @@ const createReview = async (req, res) => {
       });
     }
 
-    if (task.status !== "completed") {
-      return res.status(400).json({
-        message: "Review is available only after completion"
-      });
-    }
+    const submission =
+    await WorkSubmission.findOne({
+
+        task: task._id,
+
+        owner: req.user.id,
+
+        status: {
+            $in: [
+                "approved",
+                "rejected"
+            ]
+        }
+
+    }).sort({
+
+        reviewedAt: -1,
+        createdAt: -1
+
+    });
+
+
+if (!submission) {
+
+    return res.status(400).json({
+
+        message:
+            "Review is available after the owner approves or rejects the submitted work"
+
+    });
+
+}
 
     const escrow = await Escrow.findOne({
       task: task._id,
@@ -134,8 +164,70 @@ const getProviderReviews = async (req, res) => {
   }
 };
 
+const getMyReviewableTasks = async (
+    req,
+    res
+) => {
+
+    try {
+
+        const submissions =
+            await WorkSubmission.find({
+
+                owner: req.user.id,
+
+                status: {
+                    $in: [
+                        "approved",
+                        "rejected"
+                    ]
+                }
+
+            })
+            .populate(
+                "task",
+                "title status"
+            )
+            .populate(
+                "worker",
+                "name email"
+            )
+            .sort({
+
+                reviewedAt: -1,
+                createdAt: -1
+
+            });
+
+
+        return res.status(200).json({
+
+            count:
+                submissions.length,
+
+            submissions
+
+        });
+
+    } catch (error) {
+
+        return res.status(500).json({
+
+            message:
+                "Failed to load reviewable tasks",
+
+            error:
+                error.message
+
+        });
+
+    }
+
+};
+
 module.exports = {
   createReview,
   updateProviderRating,
-  getProviderReviews
+  getProviderReviews,
+  getMyReviewableTasks
 };

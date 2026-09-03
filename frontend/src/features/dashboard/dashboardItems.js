@@ -103,7 +103,7 @@ export const dashboardSections = [
                 title: "Ratings & Reviews",
                 description:
                     "View and manage reputation feedback.",
-                path: "/jobs/approval",
+                path: "/reviews",
                 status: "available",
             },
             {
@@ -120,7 +120,7 @@ export const dashboardSections = [
                 description:
                     "Compare bids, ratings, experience, and credentials.",
                 path: "/bidders/compare",
-                status: "coming",
+                status: "available",
             },
         ],
     },
