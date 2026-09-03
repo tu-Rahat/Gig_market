@@ -18,6 +18,9 @@ const ProfessionalProfile = () => {
       headline: "",
       bio: "",
       skillsText: "",
+      latitude: "",
+      longitude: "",
+      isAvailable: true,
       experience: []
     });
   const [completedJobs, setCompletedJobs] =
@@ -51,6 +54,12 @@ const ProfessionalProfile = () => {
             data.profile?.skills ||
             []
           ).join(", "),
+        latitude:
+          data.user?.location?.latitude ?? "",
+        longitude:
+          data.user?.location?.longitude ?? "",
+        isAvailable:
+          data.user?.isAvailable !== false,
         experience:
           data.profile?.experience ||
           []
@@ -144,6 +153,11 @@ const ProfessionalProfile = () => {
           bio:
             formData.bio,
           skills,
+          location: {
+            latitude: Number(formData.latitude),
+            longitude: Number(formData.longitude)
+          },
+          isAvailable: formData.isAvailable,
           experience:
             formData.experience
         });
@@ -241,6 +255,44 @@ const ProfessionalProfile = () => {
           <p className="text-xs text-gray-500 mt-2">
             Separate skills with commas.
           </p>
+          <div className="grid sm:grid-cols-2 gap-3 mt-5">
+            <input
+              type="number"
+              step="any"
+              min="-90"
+              max="90"
+              value={formData.latitude}
+              onChange={(event) =>
+                setFormData({ ...formData, latitude: event.target.value })
+              }
+              placeholder="Latitude"
+              className="w-full border rounded-xl p-3"
+              required
+            />
+            <input
+              type="number"
+              step="any"
+              min="-180"
+              max="180"
+              value={formData.longitude}
+              onChange={(event) =>
+                setFormData({ ...formData, longitude: event.target.value })
+              }
+              placeholder="Longitude"
+              className="w-full border rounded-xl p-3"
+              required
+            />
+          </div>
+          <label className="flex gap-2 items-center mt-4">
+            <input
+              type="checkbox"
+              checked={formData.isAvailable}
+              onChange={(event) =>
+                setFormData({ ...formData, isAvailable: event.target.checked })
+              }
+            />
+            Available for new work
+          </label>
           <div className="flex items-center justify-between mt-8">
             <h2 className="text-xl font-semibold">
               Experience

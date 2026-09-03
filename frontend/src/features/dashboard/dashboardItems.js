@@ -36,27 +36,27 @@ export const dashboardSections = [
             },
             {
                 number: 5,
-                title: "Live Bid Ranking",
+                title: "Nearby Provider Search",
                 description:
-                    "View bidders ranked by bid amount.",
-                path: "/bids/ranking",
-                status: "coming",
+                    "Find providers near your task location.",
+                path: "/providers/nearby",
+                status: "available",
             },
             {
                 number: 6,
-                title: "Bid Expiration",
+                title: "Quote Comparison",
                 description:
-                    "Track remaining auction time.",
-                path: "/bids/expiration",
-                status: "coming",
+                    "Compare provider quotations on your task.",
+                path: "/tasks/mine",
+                status: "available",
             },
             {
                 number: 7,
                 title: "Worker Selection",
                 description:
-                    "Choose a worker from submitted bids.",
+                    "Review providers selected across your tasks.",
                 path: "/workers/select",
-                status: "coming",
+                status: "available",
             },
         ],
     },

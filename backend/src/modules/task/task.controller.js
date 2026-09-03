@@ -1,5 +1,6 @@
 const Task = require("./task.model");
 const Category = require("../category/category.model");
+const Bid = require("../bid/bid.model");
 
 // Create a new task advertisement
 const createTask = async (req, res) => {
@@ -140,6 +141,47 @@ const getMyTasks = async (req, res) => {
     } catch (error) {
         return res.status(500).json({
             message: "Failed to load your advertisements",
+            error: error.message
+        });
+    }
+};
+
+// Owner history of providers selected across all advertisements.
+const getMySelectionHistory = async (req, res) => {
+    try {
+        const tasks = await Task.find({
+            createdBy: req.user.id,
+            bookingStatus: "confirmed",
+            selectedWorker: { $ne: null }
+        })
+            .populate("category", "name")
+            .populate(
+                "selectedWorker",
+                "name profileImage bio skills experience rating completedJobs"
+            )
+            .sort({ updatedAt: -1 });
+
+        const selectedBids = await Bid.find({
+            task: { $in: tasks.map((task) => task._id) },
+            status: "selected"
+        }).select("task amount message estimatedCompletionTime createdAt");
+
+        const bidByTaskId = new Map(
+            selectedBids.map((bid) => [bid.task.toString(), bid])
+        );
+
+        const selections = tasks.map((task) => ({
+            task,
+            selectedBid: bidByTaskId.get(task._id.toString()) || null
+        }));
+
+        return res.status(200).json({
+            count: selections.length,
+            selections
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: "Failed to load provider selection history",
             error: error.message
         });
     }
@@ -323,6 +365,7 @@ module.exports = {
     getTasks,
     getTaskById,
     getMyTasks,
+    getMySelectionHistory,
     updateTask,
     cancelTask
 };

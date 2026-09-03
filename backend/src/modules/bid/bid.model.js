@@ -28,6 +28,11 @@ const bidSchema = new mongoose.Schema(
                 "Bid message cannot exceed 1000 characters"
             ]
         },
+        estimatedCompletionTime: {
+            type: Number,
+            min: 0,
+            default: 0
+        },
         status: {
             type: String,
             enum: [

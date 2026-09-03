@@ -5,6 +5,7 @@ const {
     getTasks,
     getTaskById,
     getMyTasks,
+    getMySelectionHistory,
     updateTask,
     cancelTask
 } = require("./task.controller");
@@ -17,6 +18,9 @@ router.get("/", getTasks);
 // Logged-in owner's advertisements
 // MUST stay before "/:id"
 router.get("/mine", protect, getMyTasks);
+
+// Logged-in owner's provider selection history
+router.get("/selection-history", protect, getMySelectionHistory);
 
 // Create advertisement
 router.post("/", protect, createTask);

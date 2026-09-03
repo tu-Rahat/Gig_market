@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Route, Routes, useParams } from "react-router-dom";
 import AdminLogin from
     "../pages/AdminLogin";
 import AdminDisputes from "../pages/AdminDisputes";
@@ -31,9 +31,16 @@ import Credentials from "../pages/Credentials";
 import CredentialBidderFilter from "../features/bidderFilter/CredentialBidderFilter";
 import ProfessionalProfile from "../features/workerProfile/ProfessionalProfile";
 import WorkerProfile from "../features/workerProfile/WorkerProfileView";
+import NearbyProviders from "../pages/NearbyProviders";
+import QuoteComparison from "../pages/QuoteComparison";
+import SelectionHistory from "../pages/SelectionHistory";
 
 import ProtectedRoute from "../features/auth/ProtectedRoute";
 
+const QuoteComparisonPage = () => {
+    const { taskId } = useParams();
+    return <QuoteComparison taskId={taskId} />;
+};
 
 const AppRoutes = () => {
 
@@ -132,6 +139,24 @@ const AppRoutes = () => {
                     }
                 />
 
+                <Route
+                    path="/providers/nearby"
+                    element={
+                        <ProtectedRoute>
+                            <NearbyProviders />
+                        </ProtectedRoute>
+                    }
+                />
+
+                <Route
+                    path="/tasks/:taskId/quotes"
+                    element={
+                        <ProtectedRoute>
+                            <QuoteComparisonPage />
+                        </ProtectedRoute>
+                    }
+                />
+
 
                 {/* Future Member 1 Features */}
 
@@ -157,7 +182,7 @@ const AppRoutes = () => {
                     path="/workers/select"
                     element={
                         <ProtectedRoute>
-                            <FeaturePlaceholder />
+                            <SelectionHistory />
                         </ProtectedRoute>
                     }
                 />

@@ -20,6 +20,11 @@ export const getMyTasks = async () => {
     return response.data;
 };
 
+export const getMySelectionHistory = async () => {
+    const response = await api.get("/tasks/selection-history");
+    return response.data;
+};
+
 export const updateTask = async (taskId, taskData) => {
     const response = await api.patch(`/tasks/${taskId}`, taskData);
     return response.data;

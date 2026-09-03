@@ -50,6 +50,17 @@ const taskSchema = new mongoose.Schema(
             type: String,
             enum: ["open", "in_progress", "completed", "cancelled"],
             default: "open"
+        },
+        bookingStatus: {
+            type: String,
+            enum: ["pending", "confirmed", "cancelled", "completed"],
+            default: "pending",
+            index: true
+        },
+        selectedWorker: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            default: null
         }
     },
     {
