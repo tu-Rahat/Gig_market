@@ -1,5 +1,15 @@
 const jwt = require("jsonwebtoken");
 
+const {
+    getRSAPrivateKey
+} = require("../../crypto/rsa/rsa.keyProvider");
+
+const {
+    decryptUserData
+} = require("../../crypto/rsa/user.rsa");
+
+const DEV_RSA_KEY_ID = "dev-rsa-key";
+
 const Credential = require(
     "../credential/credential.model"
 );
@@ -99,9 +109,34 @@ const getPendingCredentials = async (
                     verificationRequestedAt: 1
                 });
 
+        const privateKey =
+            await getRSAPrivateKey(
+                DEV_RSA_KEY_ID
+            );
+
+        for (const credential of credentials) {
+            if (
+                credential.owner &&
+                credential.owner.name &&
+                typeof credential.owner.name === "object"
+            ) {
+                const decrypted =
+                    await decryptUserData(
+                        {
+                            name: credential.owner.name
+                        },
+                        privateKey
+                    );
+
+                credential.owner.name =
+                    decrypted.name;
+            }
+        }
+
         return res.status(200).json({
             credentials
         });
+
     } catch (error) {
         return res.status(500).json({
             message:
