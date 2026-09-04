@@ -3,6 +3,11 @@ const {
     decryptData
 } = require("./rsa.service");
 
+const {
+    getRSAPublicKey,
+    getRSAPrivateKey
+} = require("./rsa.keyProvider");
+
 /**
  * RSA Application Adapter
  *
@@ -159,9 +164,55 @@ const decryptFields = async (
     return result;
 };
 
+/**
+ * Encrypt application data using a managed RSA key.
+ *
+ * @param {*} value
+ * @param {string} keyId
+ * @returns {Promise<Object>}
+ */
+const encryptWithManagedKey = async (
+    value,
+    keyId
+) => {
+    const publicKey =
+        await getRSAPublicKey(
+            keyId
+        );
+
+    return encryptApplicationData(
+        value,
+        publicKey
+    );
+};
+
+/**
+ * Decrypt application data using a managed RSA key.
+ *
+ * @param {Object} encryptedValue
+ * @param {string} keyId
+ * @returns {Promise<*>}
+ */
+const decryptWithManagedKey = async (
+    encryptedValue,
+    keyId
+) => {
+    const privateKey =
+        await getRSAPrivateKey(
+            keyId
+        );
+
+    return decryptApplicationData(
+        encryptedValue,
+        privateKey
+    );
+};
+
 module.exports = {
     encryptApplicationData,
     decryptApplicationData,
     encryptFields,
-    decryptFields
+    decryptFields,
+    encryptWithManagedKey,
+    decryptWithManagedKey
 };
