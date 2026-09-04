@@ -69,6 +69,50 @@ function bigIntToBuffer(value) {
 }
 
 /**
+ * Get the maximum plaintext block size in bytes.
+ *
+ * RSA can only encrypt a message smaller than the modulus.
+ * We reserve one byte so the resulting integer is always
+ * safely smaller than n.
+ */
+function getMaxBlockSize(publicKey) {
+    const n = BigInt(publicKey.n);
+
+    const modulusBits =
+        n.toString(2).length;
+
+    const modulusBytes =
+        Math.floor(modulusBits / 8);
+
+    return modulusBytes - 1;
+}
+
+/**
+ * Split a Buffer into RSA-compatible blocks.
+ */
+function splitIntoBlocks(
+    buffer,
+    blockSize
+) {
+    const blocks = [];
+
+    for (
+        let offset = 0;
+        offset < buffer.length;
+        offset += blockSize
+    ) {
+        blocks.push(
+            buffer.subarray(
+                offset,
+                offset + blockSize
+            )
+        );
+    }
+
+    return blocks;
+}
+
+/**
  * Generate an RSA key pair.
  */
 async function generateRSAKeyPair(
@@ -85,6 +129,12 @@ async function generateRSAKeyPair(
  * into the RSA modulus. Block handling will be added
  * in the next implementation stage.
  */
+/**
+ * Encrypt application data using RSA blocks.
+ *
+ * Large data is divided into multiple blocks because
+ * a single RSA operation cannot encrypt unlimited data.
+ */
 async function encryptData(
     data,
     publicKey
@@ -92,28 +142,40 @@ async function encryptData(
     const plaintext =
         serializeData(data);
 
-    const message =
-        bufferToBigInt(plaintext);
+    const blockSize =
+        getMaxBlockSize(publicKey);
 
-    const n = BigInt(publicKey.n);
-
-    if (message >= n) {
+    if (blockSize <= 0) {
         throw new Error(
-            "Data is too large for the current RSA block. Use block encryption."
+            "Invalid RSA modulus"
         );
     }
 
-    const ciphertext =
-        encryptInteger(
-            message,
-            publicKey
+    const blocks =
+        splitIntoBlocks(
+            plaintext,
+            blockSize
         );
+
+    const encryptedBlocks =
+        blocks.map((block) => {
+            const message =
+                bufferToBigInt(block);
+
+            const ciphertext =
+                encryptInteger(
+                    message,
+                    publicKey
+                );
+
+            return ciphertext.toString(16);
+        });
 
     return {
         algorithm: "Custom RSA",
         encoding: "hex",
-        ciphertext:
-            ciphertext.toString(16),
+        blockSize,
+        blocks: encryptedBlocks,
         originalType:
             typeof data
     };
@@ -122,34 +184,58 @@ async function encryptData(
 /**
  * Decrypt application data using RSA.
  */
+/**
+ * Decrypt RSA encrypted blocks.
+ */
 async function decryptData(
     encryptedData,
     privateKey
 ) {
     if (
         !encryptedData ||
-        encryptedData.ciphertext === undefined
+        !Array.isArray(
+            encryptedData.blocks
+        )
     ) {
         throw new Error(
             "Invalid encrypted data"
         );
     }
 
-    const ciphertext =
-        BigInt(
-            "0x" +
-            encryptedData.ciphertext
-        );
+    const decryptedBlocks =
+        encryptedData.blocks.map(
+            (ciphertextHex) => {
+                if (
+                    typeof ciphertextHex !==
+                    "string" ||
+                    ciphertextHex.length === 0
+                ) {
+                    throw new Error(
+                        "Invalid RSA ciphertext block"
+                    );
+                }
 
-    const plaintextNumber =
-        decryptInteger(
-            ciphertext,
-            privateKey
+                const ciphertext =
+                    BigInt(
+                        "0x" +
+                        ciphertextHex
+                    );
+
+                const plaintextNumber =
+                    decryptInteger(
+                        ciphertext,
+                        privateKey
+                    );
+
+                return bigIntToBuffer(
+                    plaintextNumber
+                );
+            }
         );
 
     const plaintext =
-        bigIntToBuffer(
-            plaintextNumber
+        Buffer.concat(
+            decryptedBlocks
         );
 
     return deserializeData(
@@ -164,5 +250,7 @@ module.exports = {
     serializeData,
     deserializeData,
     bufferToBigInt,
-    bigIntToBuffer
+    bigIntToBuffer,
+    getMaxBlockSize,
+    splitIntoBlocks
 };
