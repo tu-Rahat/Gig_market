@@ -3,15 +3,6 @@ const {
     decryptFields
 } = require("./rsa.application");
 
-/*
- * User fields that contain application/user information.
- *
- * Password is intentionally excluded because passwords
- * must be hashed and salted, not RSA encrypted.
- *
- * Email is also excluded for now because the existing
- * authentication flow uses email for database lookup.
- */
 const USER_ENCRYPTED_FIELDS = [
     "name",
     "profileImage",
@@ -22,11 +13,20 @@ const USER_ENCRYPTED_FIELDS = [
 ];
 
 /**
- * Encrypt protected user fields before persistence.
- *
- * @param {Object} userData
- * @param {Object} publicKey
- * @returns {Promise<Object>}
+ * Determines whether a value is one of our
+ * RSA encrypted envelopes.
+ */
+const isEncryptedValue = (value) => {
+    return Boolean(
+        value &&
+        typeof value === "object" &&
+        value.algorithm === "Custom RSA" &&
+        Array.isArray(value.blocks)
+    );
+};
+
+/**
+ * Encrypt protected user fields.
  */
 const encryptUserData = async (
     userData,
@@ -40,25 +40,48 @@ const encryptUserData = async (
 };
 
 /**
- * Decrypt protected user fields after retrieval.
+ * Decrypt protected user fields.
  *
- * @param {Object} userData
- * @param {Object} privateKey
- * @returns {Promise<Object>}
+ * Existing plaintext values are preserved so that
+ * old database records do not immediately break.
  */
 const decryptUserData = async (
     userData,
     privateKey
 ) => {
+    if (
+        !userData ||
+        typeof userData !== "object"
+    ) {
+        return userData;
+    }
+
+    const encryptedFields =
+        USER_ENCRYPTED_FIELDS.filter(
+            (field) =>
+                isEncryptedValue(
+                    userData[field]
+                )
+        );
+
+    if (
+        encryptedFields.length === 0
+    ) {
+        return {
+            ...userData
+        };
+    }
+
     return decryptFields(
         userData,
-        USER_ENCRYPTED_FIELDS,
+        encryptedFields,
         privateKey
     );
 };
 
 module.exports = {
     USER_ENCRYPTED_FIELDS,
+    isEncryptedValue,
     encryptUserData,
     decryptUserData
 };

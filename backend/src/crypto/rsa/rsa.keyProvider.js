@@ -112,8 +112,21 @@ const getRSAPrivateKey = async (
     return key;
 };
 
+const configureDevelopmentRSAProvider = () => {
+    const devProvider = require(
+        "./dev.rsaProvider"
+    );
+
+    configureRSAKeyProvider(
+        devProvider
+    );
+
+    return devProvider.getDevRSAKeyId();
+};
+
 module.exports = {
     configureRSAKeyProvider,
+    configureDevelopmentRSAProvider,
     getRSAPublicKey,
     getRSAPrivateKey
 };

@@ -1,12 +1,52 @@
 const mongoose = require("mongoose");
+const encryptedValueSchema =
+    new mongoose.Schema(
+        {
+            algorithm: {
+                type: String,
+                required: true
+            },
 
+            padding: {
+                type: String,
+                required: true
+            },
+
+            encoding: {
+                type: String,
+                required: true
+            },
+
+            modulusByteLength: {
+                type: Number,
+                required: true
+            },
+
+            blockSize: {
+                type: Number,
+                required: true
+            },
+
+            blocks: {
+                type: [String],
+                required: true
+            },
+
+            originalType: {
+                type: String,
+                required: true
+            }
+        },
+        {
+            _id: false
+        }
+    );
 
 const userSchema = new mongoose.Schema(
     {
         name: {
-            type: String,
-            required: true,
-            trim: true
+            type: encryptedValueSchema,
+            required: true
         },
 
         email: {
@@ -23,28 +63,28 @@ const userSchema = new mongoose.Schema(
         },
 
         profileImage: {
-            type: String,
-            default: ""
+            type: encryptedValueSchema,
+            default: null
         },
 
         bio: {
-            type: String,
-            default: ""
+            type: encryptedValueSchema,
+            default: null
         },
 
         skills: {
-            type: [String],
-            default: []
+            type: encryptedValueSchema,
+            default: null
         },
 
         experience: {
-            type: String,
-            default: ""
+            type: encryptedValueSchema,
+            default: null
         },
 
         certifications: {
-            type: [String],
-            default: []
+            type: encryptedValueSchema,
+            default: null
         },
 
         badges: {

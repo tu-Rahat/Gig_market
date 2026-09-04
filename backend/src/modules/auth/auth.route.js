@@ -7,7 +7,8 @@ const router = express.Router();
 
 const {
     registerUser,
-    loginUser
+    loginUser,
+    getProfile
 } = require("./auth.controller");
 
 
@@ -18,14 +19,11 @@ router.post("/login", loginUser);
 
 
 // Protected Route
-router.get("/profile", protect, (req, res) => {
-
-    res.json({
-        message: "Profile accessed successfully",
-        user: req.user
-    });
-
-});
+router.get(
+    "/profile",
+    protect,
+    getProfile
+);
 
 
 module.exports = router;

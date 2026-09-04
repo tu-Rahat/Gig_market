@@ -1,3 +1,6 @@
+const {
+    configureDevelopmentRSAProvider
+} = require("./crypto/rsa/rsa.keyProvider");
 const express = require("express");
 const cors = require("cors");
 const adminRoutes = require(
@@ -58,6 +61,12 @@ const providerRoutes = require(
 
 const app = express();
 
+// Development RSA key provider.
+// Member 2's persistent Key Management module will
+// replace this integration later.
+if (process.env.NODE_ENV !== "production") {
+    configureDevelopmentRSAProvider();
+}
 
 // Middleware
 app.use(cors());
