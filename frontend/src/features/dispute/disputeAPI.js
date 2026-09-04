@@ -2,17 +2,7 @@ import api from "../../services/api";
 
 
 const getAuthConfig = () => {
-
-    const token =
-        localStorage.getItem("token");
-
-    return {
-        headers: {
-            Authorization:
-                `Bearer ${token}`
-        }
-    };
-
+    return {};
 };
 
 

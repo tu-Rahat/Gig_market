@@ -1,6 +1,10 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("./auth.model");
+const {
+    setUserSession,
+    clearUserSession
+} = require("../../middleware/sessionCookies");
 
 const {
     encryptUserData,
@@ -179,6 +183,8 @@ const loginUser = async (req, res) => {
                 }
             );
 
+            setUserSession(res, token);
+
 const decryptedUser =
     await decryptUserForResponse(
         user
@@ -187,8 +193,6 @@ const decryptedUser =
 return res.status(200).json({
     message:
         "Login successful",
-
-    token,
 
     user: {
         id: user._id,
@@ -203,6 +207,11 @@ return res.status(200).json({
             error: error.message
         });
     }
+};
+
+const logoutUser = (req, res) => {
+    clearUserSession(res);
+    return res.status(200).json({ message: "Logout successful" });
 };
 
 const getProfile = async (req, res) => {
@@ -265,5 +274,6 @@ const getProfile = async (req, res) => {
 module.exports = {
     registerUser,
     loginUser,
+    logoutUser,
     getProfile
 };

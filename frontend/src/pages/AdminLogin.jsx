@@ -51,12 +51,6 @@ const AdminLogin = () => {
                 );
 
 
-            localStorage.setItem(
-                "adminToken",
-                data.token
-            );
-
-
             navigate(
                 "/admin"
             );

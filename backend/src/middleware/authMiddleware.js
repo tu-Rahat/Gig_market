@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { getCookie, USER_COOKIE } = require("./sessionCookies");
 
 
 const protect = async (req, res, next) => {
@@ -7,9 +8,13 @@ const protect = async (req, res, next) => {
 
         // Get token from header
         const authHeader = req.headers.authorization;
+        const token = getCookie(req, USER_COOKIE) ||
+            (authHeader && authHeader.startsWith("Bearer ")
+                ? authHeader.split(" ")[1]
+                : null);
 
 
-        if (!authHeader || !authHeader.startsWith("Bearer")) {
+        if (!token) {
 
             return res.status(401).json({
                 message: "Not authorized, no token"
@@ -19,9 +24,6 @@ const protect = async (req, res, next) => {
 
 
         // Extract token
-        const token = authHeader.split(" ")[1];
-
-
         // Verify token
         const decoded = jwt.verify(
             token,

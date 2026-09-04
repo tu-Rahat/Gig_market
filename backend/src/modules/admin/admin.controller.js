@@ -1,4 +1,8 @@
 const jwt = require("jsonwebtoken");
+const {
+    setAdminSession,
+    clearAdminSession
+} = require("../../middleware/sessionCookies");
 
 const {
     getRSAPrivateKey
@@ -67,11 +71,11 @@ const adminLogin = async (req, res) => {
             }
         );
 
+        setAdminSession(res, token);
+
         return res.status(200).json({
             message:
                 "Admin login successful",
-
-            token,
 
             admin: {
                 email:
@@ -90,6 +94,11 @@ const adminLogin = async (req, res) => {
     }
 };
 
+
+const adminLogout = (req, res) => {
+    clearAdminSession(res);
+    return res.status(200).json({ message: "Admin logout successful" });
+};
 
 const getPendingCredentials = async (
     req,
@@ -290,6 +299,7 @@ const rejectCredential = async (
 
 module.exports = {
     adminLogin,
+    adminLogout,
     getPendingCredentials,
     approveCredential,
     rejectCredential

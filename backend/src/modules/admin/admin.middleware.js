@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { getCookie, ADMIN_COOKIE } = require("../../middleware/sessionCookies");
 
 
 const requireAdmin = (
@@ -10,22 +11,19 @@ const requireAdmin = (
 
         const authorization =
             req.headers.authorization;
+        const token = getCookie(req, ADMIN_COOKIE) ||
+            (authorization && authorization.startsWith("Bearer ")
+                ? authorization.split(" ")[1]
+                : null);
 
         if (
-            !authorization ||
-            !authorization.startsWith(
-                "Bearer "
-            )
+            !token
         ) {
             return res.status(401).json({
                 message:
                     "Admin authentication required"
             });
         }
-
-
-        const token =
-            authorization.split(" ")[1];
 
 
         const decoded = jwt.verify(

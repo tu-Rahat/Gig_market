@@ -1,20 +1,8 @@
 import api from "../../services/api";
 
 
-const getAdminToken = () => {
-    return localStorage.getItem(
-        "adminToken"
-    );
-};
-
-
 const getAdminConfig = () => {
-    return {
-        headers: {
-            Authorization:
-                `Bearer ${getAdminToken()}`
-        }
-    };
+    return {};
 };
 
 
@@ -31,6 +19,11 @@ export const loginAdmin = async (
         }
     );
 
+    return response.data;
+};
+
+export const logoutAdmin = async () => {
+    const response = await api.post("/admin/logout");
     return response.data;
 };
 
