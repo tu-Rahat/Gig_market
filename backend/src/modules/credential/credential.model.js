@@ -18,31 +18,16 @@ const credentialSchema = new mongoose.Schema(
       index: true
     },
     title: {
-      type: String,
-      required: [true, "Credential title is required"],
-      trim: true,
-      maxlength: [
-        150,
-        "Credential title cannot exceed 150 characters"
-      ]
+      type: mongoose.Schema.Types.Mixed,
+      required: [true, "Credential title is required"]
     },
     issuer: {
-      type: String,
-      default: "",
-      trim: true,
-      maxlength: [
-        150,
-        "Issuer cannot exceed 150 characters"
-      ]
+      type: mongoose.Schema.Types.Mixed,
+      default: ""
     },
     description: {
-      type: String,
-      default: "",
-      trim: true,
-      maxlength: [
-        2000,
-        "Description cannot exceed 2000 characters"
-      ]
+      type: mongoose.Schema.Types.Mixed,
+      default: ""
     },
     issuedDate: {
       type: Date,
@@ -97,6 +82,11 @@ const credentialSchema = new mongoose.Schema(
       type: String,
       default: "",
       trim: true
+    },
+    __protected: {
+      type: mongoose.Schema.Types.Mixed,
+      default: undefined,
+      select: false
     }
   },
   {

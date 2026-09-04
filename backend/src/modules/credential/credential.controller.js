@@ -2,6 +2,11 @@ const fs = require("fs");
 const Credential = require(
   "./credential.model"
 );
+const {
+  protectCredential,
+  unprotectCredential,
+  includeProtectionMetadata
+} = require("./credential.crypto");
 
 const removeUploadedFile = (file) => {
   if (!file?.path) {
@@ -70,8 +75,7 @@ const uploadCredentialDocument = async (
       }
     }
 
-    const credential =
-      await Credential.create({
+    const protectedCredential = await protectCredential({
         owner: req.user.id,
         credentialType,
         title: title.trim(),
@@ -93,11 +97,15 @@ const uploadCredentialDocument = async (
             req.file.size
         }
       });
+    const credential = await Credential.create(protectedCredential);
+    const responseCredential = await unprotectCredential(
+      credential.toObject()
+    );
 
     return res.status(201).json({
       message:
         "Credential uploaded successfully",
-      credential
+      credential: responseCredential
     });
   } catch (error) {
     removeUploadedFile(req.file);
@@ -114,12 +122,16 @@ const getMyCredentials = async (
   res
 ) => {
   try {
-    const credentials =
-      await Credential.find({
+    const storedCredentials =
+      includeProtectionMetadata(Credential.find({
         owner: req.user.id
-      }).sort({
+      })).sort({
         createdAt: -1
       });
+
+    const credentials = await Promise.all(
+      storedCredentials.map(unprotectCredential)
+    );
 
     return res.status(200).json({
       count: credentials.length,
@@ -140,7 +152,7 @@ const requestCredentialVerification = async (
   res
 ) => {
   try {
-    const credential =
+    let credential =
       await Credential.findById(
         req.params.id
       );
@@ -182,12 +194,22 @@ const requestCredentialVerification = async (
       });
     }
 
-    credential.verificationStatus =
+    const plainCredential = await unprotectCredential(
+      credential.toObject()
+    );
+    plainCredential.verificationStatus =
       "pending";
-    credential.verificationRequestedAt =
+    plainCredential.verificationRequestedAt =
       new Date();
-    credential.rejectionReason = "";
-    await credential.save();
+    plainCredential.rejectionReason = "";
+    const protectedCredential = await protectCredential(
+      plainCredential
+    );
+    await Credential.replaceOne(
+      { _id: credential._id },
+      protectedCredential
+    );
+    credential = await unprotectCredential(protectedCredential);
 
     return res.status(200).json({
       message:

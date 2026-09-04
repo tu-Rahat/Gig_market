@@ -13,6 +13,10 @@ const Credential = require(
 const {
   updateProviderBadges
 } = require("../badge/badge.service");
+const {
+  unprotectCredentials,
+  includeProtectionMetadata
+} = require("../credential/credential.crypto");
 
 const normalizeSkills = (skills) => {
   if (!Array.isArray(skills)) {
@@ -85,17 +89,19 @@ const buildProfileResponse = async (
   });
   const completedJobs =
     await getCompletedJobs(userId);
-  const verifiedCredentials =
-    await Credential.find({
+  const storedCredentials =
+    await includeProtectionMetadata(Credential.find({
       owner: userId,
       verificationStatus: "verified"
-    })
+    }))
       .select(
         "credentialType title issuer issuedDate"
       )
       .sort({
         verifiedAt: -1
       });
+  const verifiedCredentials =
+    await unprotectCredentials(storedCredentials);
   return {
     user: {
       _id: user._id,
@@ -355,18 +361,20 @@ const getProviderPortfolio = async (
           "Provider not found"
       });
     }
-    const verifiedCredentials =
-      await Credential.find({
+    const storedCredentials =
+      await includeProtectionMetadata(Credential.find({
         owner: provider._id,
         verificationStatus:
           "verified"
-      })
+      }))
         .select(
           "credentialType title issuer verifiedAt"
         )
         .sort({
           verifiedAt: -1
         });
+    const verifiedCredentials =
+      await unprotectCredentials(storedCredentials);
     return res.status(200).json({
       provider,
       verifiedCredentials

@@ -33,7 +33,7 @@ const CRYPTO_POLICY = {
     // Credentials and security-sensitive data
     credential: {
         algorithm: "Custom ECC",
-        fields: ["credentialData", "verification"],
+        fields: ["title", "issuer", "description"],
         keyId: "dev-ecc-key"
     },
 

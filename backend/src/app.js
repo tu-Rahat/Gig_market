@@ -1,6 +1,9 @@
 const {
     configureDevelopmentRSAProvider
 } = require("./crypto/rsa/rsa.keyProvider");
+const {
+    configureDevelopmentECCProvider
+} = require("./crypto/ecc/ecc.keyProvider");
 const express = require("express");
 const cors = require("cors");
 const adminRoutes = require(
@@ -66,6 +69,7 @@ const app = express();
 // replace this integration later.
 if (process.env.NODE_ENV !== "production") {
     configureDevelopmentRSAProvider();
+    configureDevelopmentECCProvider();
 }
 
 // Middleware

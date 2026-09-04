@@ -7,6 +7,10 @@ const Bid = require(
 const Credential = require(
   "../credential/credential.model"
 );
+const {
+  unprotectCredentials,
+  includeProtectionMetadata
+} = require("../credential/credential.crypto");
 
 const filterTaskBidders = async (
   req,
@@ -111,9 +115,11 @@ const filterTaskBidders = async (
           verificationStatus;
       }
 
-      const credentials =
-        await Credential.find(
+      const storedCredentials =
+        await includeProtectionMetadata(Credential.find(
           credentialQuery
+        )).select(
+          "credentialType title issuer verificationStatus verifiedAt +__protected"
         )
           .select(
             "credentialType title issuer verificationStatus verifiedAt"
@@ -122,6 +128,9 @@ const filterTaskBidders = async (
             verifiedAt: -1,
             createdAt: -1
           });
+      const credentials = await unprotectCredentials(
+        storedCredentials
+      );
 
       // When a specific filter is selected,
       // include only bidders who match it.

@@ -8,6 +8,18 @@ const Escrow = require(
 const Task = require(
  "../task/task.model"
 );
+const {
+    encryptText,
+    decryptText
+} = require(
+    "../../crypto/ecc/ecc.application"
+);
+
+const {
+    configureDevelopmentECCProvider
+} = require(
+    "../../crypto/ecc/ecc.keyProvider"
+);
 const removeUploadedFile = (file) => {
  if (!file?.path) {
  return;
@@ -32,6 +44,29 @@ const buildEvidence = (file) => {
  fileSize: file.size
  };
 };
+const decryptCompletionNote = async (
+    completionNote
+) => {
+    // Existing submissions created before
+    // ECC integration are stored as plaintext.
+    if (
+        typeof completionNote === "string"
+    ) {
+        return completionNote;
+    }
+
+    if (!completionNote) {
+        return completionNote;
+    }
+
+    const keyId =
+        configureDevelopmentECCProvider();
+
+    return await decryptText(
+        completionNote,
+        keyId
+    );
+};
 // Feature 17: worker submits completed work
 const submitCompletedWork = async (req, res) => {
  try {
@@ -43,6 +78,17 @@ const submitCompletedWork = async (req, res) => {
  message: "Completion note is required"
  });
  }
+ const trimmedCompletionNote =
+    completionNote.trim();
+
+if (trimmedCompletionNote.length > 3000) {
+    removeUploadedFile(req.file);
+
+    return res.status(400).json({
+        message:
+            "Completion note cannot exceed 3000 characters"
+    });
+}
  const escrow = await Escrow.findById(
  escrowId
  );
@@ -91,6 +137,14 @@ const submitCompletedWork = async (req, res) => {
  "This task completion has already been approved"
  });
  }
+ const keyId =
+    configureDevelopmentECCProvider();
+
+const encryptedCompletionNote =
+    await encryptText(
+        trimmedCompletionNote,
+        keyId
+    );
  const submission =
  await WorkSubmission.create({
  escrow: escrow._id,

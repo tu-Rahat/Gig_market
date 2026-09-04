@@ -26,14 +26,9 @@ const workSubmissionSchema = new mongoose.Schema(
  index: true
  },
  completionNote: {
- type: String,
- required: [true, "Completion note is required"],
- trim: true,
- maxlength: [
- 3000,
- "Completion note cannot exceed 3000 characters"
- ]
- },
+    type: mongoose.Schema.Types.Mixed,
+    required: [true, "Completion note is required"]
+},
  evidence: {
  originalName: {
  type: String,

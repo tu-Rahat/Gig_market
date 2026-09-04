@@ -9,6 +9,7 @@ const { serializePoint, deserializePoint, serializeSignature, deserializeSignatu
 
 const MAX_MESSAGE_BYTES = 29;
 const MAPPING_BASE = 256n;
+const CHUNKED_VERSION = 2;
 
 const modularSquareRoot = (value) => {
     const root = require("./ecc.math").fieldPow(value, (CURVE.p + 1n) / 4n, CURVE.p);
@@ -37,26 +38,58 @@ const decodeTextPoint = (point, length) => {
     return Buffer.from(hex, "hex").subarray(-length).toString("utf8");
 };
 
+const splitUtf8 = (message) => {
+    const chunks = [];
+    let current = "";
+    let currentLength = 0;
+
+    for (const character of String(message)) {
+        const characterLength = Buffer.byteLength(character, "utf8");
+        if (current && currentLength + characterLength > MAX_MESSAGE_BYTES) {
+            chunks.push(current);
+            current = "";
+            currentLength = 0;
+        }
+        current += character;
+        currentLength += characterLength;
+    }
+
+    if (current || chunks.length === 0) chunks.push(current);
+    return chunks;
+};
+
 const encryptText = async (message, keyId) => {
     const publicKey = await getECCPublicKey(keyId);
-    const encoded = encodeTextPoint(message);
-    const ciphertext = encryptPoint(encoded.point, publicKey);
+    const chunks = [];
+
+    for (const chunk of splitUtf8(message)) {
+        const encoded = encodeTextPoint(chunk);
+        const ciphertext = encryptPoint(encoded.point, publicKey);
+        chunks.push({
+            length: encoded.length,
+            C1: serializePoint(ciphertext.C1),
+            C2: serializePoint(ciphertext.C2)
+        });
+    }
+
     return {
         algorithm: "Custom ECC ElGamal",
         curve: CURVE.name,
         keyId,
-        version: 1,
+        version: CHUNKED_VERSION,
         encoding: "utf8-point-v1",
-        length: encoded.length,
-        ciphertext: { C1: serializePoint(ciphertext.C1), C2: serializePoint(ciphertext.C2) }
+        ciphertext: { chunks }
     };
 };
 
 const decryptText = async (encryptedValue, keyId) => {
-    if (!encryptedValue || encryptedValue.keyId !== keyId || encryptedValue.version !== 1) throw new Error("Unsupported ECC ciphertext metadata");
+    if (!encryptedValue || encryptedValue.keyId !== keyId || encryptedValue.version !== CHUNKED_VERSION) throw new Error("Unsupported ECC ciphertext metadata");
     const privateKey = await getECCPrivateKey(keyId);
-    const point = decryptPoint({ C1: deserializePoint(encryptedValue.ciphertext.C1), C2: deserializePoint(encryptedValue.ciphertext.C2) }, privateKey);
-    return decodeTextPoint(point, encryptedValue.length);
+    if (!Array.isArray(encryptedValue.ciphertext?.chunks)) throw new Error("Invalid ECC ciphertext chunks");
+    return encryptedValue.ciphertext.chunks.map((chunk) => {
+        const point = decryptPoint({ C1: deserializePoint(chunk.C1), C2: deserializePoint(chunk.C2) }, privateKey);
+        return decodeTextPoint(point, chunk.length);
+    }).join("");
 };
 
 const signWithManagedKey = async (message, keyId) => sign(message, await getECCPrivateKey(keyId));

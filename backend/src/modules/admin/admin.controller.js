@@ -18,6 +18,12 @@ const Credential = require(
     "../credential/credential.model"
 );
 const {
+    unprotectCredentials,
+    includeProtectionMetadata,
+    unprotectCredential,
+    protectCredential
+} = require("../credential/credential.crypto");
+const {
     updateProviderBadges
 } = require("../badge/badge.service");
 
@@ -105,11 +111,11 @@ const getPendingCredentials = async (
     res
 ) => {
     try {
-        const credentials =
-            await Credential.find({
+        const storedCredentials =
+            await includeProtectionMetadata(Credential.find({
                 verificationStatus:
                     "pending"
-            })
+            }))
                 .populate(
                     "owner",
                     "name email"
@@ -117,6 +123,8 @@ const getPendingCredentials = async (
                 .sort({
                     verificationRequestedAt: 1
                 });
+
+        const credentials = await unprotectCredentials(storedCredentials);
 
         const privateKey =
             await getRSAPrivateKey(
@@ -184,23 +192,31 @@ const approveCredential = async (
             });
         }
 
-        credential.verificationStatus =
+        const plainCredential =
+            await unprotectCredential(credential.toObject());
+        plainCredential.verificationStatus =
             "verified";
 
-        credential.rejectionReason = "";
+        plainCredential.rejectionReason = "";
 
-        credential.verifiedAt =
+        plainCredential.verifiedAt =
             new Date();
 
         if (
             "verifiedByAdmin"
-            in credential
+            in plainCredential
         ) {
-            credential.verifiedByAdmin =
+            plainCredential.verifiedByAdmin =
                 req.admin.email;
         }
 
-        await credential.save();
+        const protectedCredential = await protectCredential(
+            plainCredential
+        );
+        await Credential.replaceOne(
+            { _id: credential._id },
+            protectedCredential
+        );
         await updateProviderBadges(
             credential.owner
         );
@@ -209,7 +225,9 @@ const approveCredential = async (
             message:
                 "Credential verified successfully",
 
-            credential
+            credential: await unprotectCredential(
+                protectedCredential
+            )
         });
     } catch (error) {
         return res.status(500).json({
@@ -263,28 +281,38 @@ const rejectCredential = async (
             });
         }
 
-        credential.verificationStatus =
+        const plainCredential =
+            await unprotectCredential(credential.toObject());
+        plainCredential.verificationStatus =
             "rejected";
 
-        credential.rejectionReason =
+        plainCredential.rejectionReason =
             reason.trim();
 
-        credential.verifiedAt = null;
+        plainCredential.verifiedAt = null;
 
         if (
             "verifiedByAdmin"
-            in credential
+            in plainCredential
         ) {
-            credential.verifiedByAdmin = "";
+            plainCredential.verifiedByAdmin = "";
         }
 
-        await credential.save();
+        const protectedCredential = await protectCredential(
+            plainCredential
+        );
+        await Credential.replaceOne(
+            { _id: credential._id },
+            protectedCredential
+        );
 
         return res.status(200).json({
             message:
                 "Credential rejected",
 
-            credential
+            credential: await unprotectCredential(
+                protectedCredential
+            )
         });
     } catch (error) {
         return res.status(500).json({
