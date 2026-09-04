@@ -75,16 +75,23 @@ function bigIntToBuffer(value) {
  * We reserve one byte so the resulting integer is always
  * safely smaller than n.
  */
+/**
+ * Maximum plaintext size for one
+ * RSA PKCS#1 v1.5 encryption block.
+ *
+ * PKCS#1 requires:
+ *
+ * k - 11
+ *
+ * bytes of plaintext at most.
+ */
 function getMaxBlockSize(publicKey) {
-    const n = BigInt(publicKey.n);
+    const modulusByteLength =
+        getModulusByteLength(
+            publicKey
+        );
 
-    const modulusBits =
-        n.toString(2).length;
-
-    const modulusBytes =
-        Math.floor(modulusBits / 8);
-
-    return modulusBytes - 1;
+    return modulusByteLength - 11;
 }
 
 /**
@@ -113,6 +120,147 @@ function splitIntoBlocks(
 }
 
 /**
+ * Get the RSA modulus size in bytes.
+ */
+function getModulusByteLength(publicKey) {
+    const n = BigInt(publicKey.n);
+
+    return Math.ceil(
+        n.toString(2).length / 8
+    );
+}
+
+/**
+ * PKCS#1 v1.5 encryption padding.
+ *
+ * Encoded message:
+ *
+ * 00 || 02 || PS || 00 || M
+ *
+ * PS consists of randomly generated non-zero bytes.
+ *
+ * Minimum PS length is 8 bytes.
+ */
+function applyPKCS1Padding(
+    message,
+    modulusByteLength
+) {
+    const minimumPaddingLength = 8;
+
+    const paddingLength =
+        modulusByteLength -
+        message.length -
+        3;
+
+    if (
+        paddingLength <
+        minimumPaddingLength
+    ) {
+        throw new Error(
+            "Message is too large for the RSA block"
+        );
+    }
+
+    const padding = Buffer.alloc(
+        paddingLength
+    );
+
+    let offset = 0;
+
+    while (
+        offset < padding.length
+    ) {
+        const randomBytes =
+            crypto.randomBytes(
+                padding.length - offset
+            );
+
+        for (
+            const byte of randomBytes
+        ) {
+            if (byte !== 0) {
+                padding[offset] = byte;
+                offset++;
+
+                if (
+                    offset ===
+                    padding.length
+                ) {
+                    break;
+                }
+            }
+        }
+    }
+
+    return Buffer.concat([
+        Buffer.from([0x00, 0x02]),
+        padding,
+        Buffer.from([0x00]),
+        message
+    ]);
+}
+
+/**
+ * Remove PKCS#1 v1.5 encryption padding.
+ */
+function removePKCS1Padding(
+    encodedMessage
+) {
+    if (
+        encodedMessage.length < 11
+    ) {
+        throw new Error(
+            "Invalid RSA padded block"
+        );
+    }
+
+    if (
+        encodedMessage[0] !== 0x00 ||
+        encodedMessage[1] !== 0x02
+    ) {
+        throw new Error(
+            "Invalid RSA padding"
+        );
+    }
+
+    let separatorIndex = -1;
+
+    for (
+        let i = 2;
+        i < encodedMessage.length;
+        i++
+    ) {
+        if (
+            encodedMessage[i] === 0x00
+        ) {
+            separatorIndex = i;
+            break;
+        }
+    }
+
+    if (separatorIndex === -1) {
+        throw new Error(
+            "Invalid RSA padding separator"
+        );
+    }
+
+    const paddingLength =
+        separatorIndex - 2;
+
+    if (
+        paddingLength < 8
+    ) {
+        throw new Error(
+            "Invalid RSA padding length"
+        );
+    }
+
+    return encodedMessage.subarray(
+        separatorIndex + 1
+    );
+}
+
+/**
  * Generate an RSA key pair.
  */
 async function generateRSAKeyPair(
@@ -135,6 +283,10 @@ async function generateRSAKeyPair(
  * Large data is divided into multiple blocks because
  * a single RSA operation cannot encrypt unlimited data.
  */
+/**
+ * Encrypt application data using RSA
+ * with PKCS#1 v1.5 encryption padding.
+ */
 async function encryptData(
     data,
     publicKey
@@ -142,38 +294,62 @@ async function encryptData(
     const plaintext =
         serializeData(data);
 
+    const modulusByteLength =
+        getModulusByteLength(
+            publicKey
+        );
+
     const blockSize =
-        getMaxBlockSize(publicKey);
+        getMaxBlockSize(
+            publicKey
+        );
 
     if (blockSize <= 0) {
         throw new Error(
-            "Invalid RSA modulus"
+            "RSA modulus is too small"
         );
     }
 
-    const blocks =
+    const plaintextBlocks =
         splitIntoBlocks(
             plaintext,
             blockSize
         );
 
     const encryptedBlocks =
-        blocks.map((block) => {
-            const message =
-                bufferToBigInt(block);
+        plaintextBlocks.map(
+            (block) => {
+                const paddedBlock =
+                    applyPKCS1Padding(
+                        block,
+                        modulusByteLength
+                    );
 
-            const ciphertext =
-                encryptInteger(
-                    message,
-                    publicKey
-                );
+                const message =
+                    bufferToBigInt(
+                        paddedBlock
+                    );
 
-            return ciphertext.toString(16);
-        });
+                const ciphertext =
+                    encryptInteger(
+                        message,
+                        publicKey
+                    );
+
+                return ciphertext
+                    .toString(16)
+                    .padStart(
+                        modulusByteLength * 2,
+                        "0"
+                    );
+            }
+        );
 
     return {
         algorithm: "Custom RSA",
+        padding: "PKCS#1 v1.5",
         encoding: "hex",
+        modulusByteLength,
         blockSize,
         blocks: encryptedBlocks,
         originalType:
@@ -186,6 +362,10 @@ async function encryptData(
  */
 /**
  * Decrypt RSA encrypted blocks.
+ */
+/**
+ * Decrypt RSA blocks and remove
+ * PKCS#1 v1.5 padding.
  */
 async function decryptData(
     encryptedData,
@@ -201,6 +381,14 @@ async function decryptData(
             "Invalid encrypted data"
         );
     }
+
+    const modulusByteLength =
+        encryptedData.modulusByteLength ||
+        Math.ceil(
+            BigInt(privateKey.n)
+                .toString(2)
+                .length / 8
+        );
 
     const decryptedBlocks =
         encryptedData.blocks.map(
@@ -221,14 +409,44 @@ async function decryptData(
                         ciphertextHex
                     );
 
-                const plaintextNumber =
+                const paddedNumber =
                     decryptInteger(
                         ciphertext,
                         privateKey
                     );
 
-                return bigIntToBuffer(
-                    plaintextNumber
+                let paddedBlock =
+                    bigIntToBuffer(
+                        paddedNumber
+                    );
+
+                /*
+                 * RSA decryption may produce a Buffer
+                 * shorter than the modulus length.
+                 *
+                 * Restore leading zero bytes.
+                 */
+                if (
+                    paddedBlock.length <
+                    modulusByteLength
+                ) {
+                    const fullBlock =
+                        Buffer.alloc(
+                            modulusByteLength
+                        );
+
+                    paddedBlock.copy(
+                        fullBlock,
+                        modulusByteLength -
+                            paddedBlock.length
+                    );
+
+                    paddedBlock =
+                        fullBlock;
+                }
+
+                return removePKCS1Padding(
+                    paddedBlock
                 );
             }
         );
@@ -252,5 +470,8 @@ module.exports = {
     bufferToBigInt,
     bigIntToBuffer,
     getMaxBlockSize,
-    splitIntoBlocks
+    splitIntoBlocks,
+    getModulusByteLength,
+    applyPKCS1Padding,
+    removePKCS1Padding
 };

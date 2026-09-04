@@ -59,3 +59,47 @@ Commit:
 
 Push status:
 Pending
+
+## RSA Block Encryption
+
+Large plaintext data is divided into RSA-compatible blocks.
+
+The maximum plaintext size is calculated from the RSA modulus size.
+
+## Padding Scheme
+
+RSA PKCS#1 v1.5 encryption padding is used.
+
+Each encoded block follows:
+
+00 || 02 || PS || 00 || M
+
+where PS is a randomly generated non-zero padding string with
+a minimum length of 8 bytes.
+
+This prevents direct raw RSA encryption of plaintext blocks
+and provides randomized ciphertext for identical plaintext.
+
+## Block Processing
+
+Plaintext:
+UTF-8 data
+↓
+Split into blocks
+↓
+PKCS#1 v1.5 padding
+↓
+RSA modular exponentiation
+↓
+Ciphertext blocks
+
+During decryption the reverse process is performed.
+
+## Tests
+
+- String encryption/decryption: PASS
+- JSON encryption/decryption: PASS
+- Multi-block encryption/decryption: PASS
+- Unicode encryption/decryption: PASS
+- Randomized padding: PASS
+- Invalid/tampered ciphertext rejection: PASS
