@@ -238,3 +238,345 @@ Clean
 
 Push Status:
 Complete
+
+---
+
+## Member 3 — Application Security & Integration
+
+### Branch
+
+member3-application-security
+
+### Scope
+
+Building the application-security and integration layer around Member 1's RSA and Member 2's ECC implementations. Member 3 does NOT rewrite RSA or ECC, does NOT add cryptography libraries, and does NOT replace custom implementations with high-level APIs.
+
+### Completed
+
+1. ✓ Integrity protection layer (HMAC-SHA256)
+2. ✓ Canonical serialization for deterministic MACs
+3. ✓ Central crypto policy (defines protected data categories)
+4. ✓ OTP generation and verification (cryptographically secure)
+5. ✓ Application-level record protection/unprotection
+6. ✓ RSA integration with existing RSA application API
+7. ✓ ECC integration with existing ECC application API
+8. ✓ 2FA middleware (OTP verification, timeout management)
+9. ✓ RBAC middleware (role-based access control)
+10. ✓ Object-level authorization (ownership verification)
+11. ✓ Rate limiting middleware (brute-force protection)
+12. ✓ Sensitive data audit and inventory
+13. ✓ Comprehensive security test suite
+14. ✓ Regression tests (RSA, ECC, backend)
+
+### Architecture
+
+**Integrity Layer**
+- `hmac.service.js`: HMAC-SHA256 creation and verification
+- `canonicalize.js`: Deterministic object serialization
+- `integrity.service.js`: Combined integrity tag management
+- `integrity.test.js`: 8 integrity test cases (all PASS)
+
+**Crypto Policy**
+- `crypto.policy.js`: Central policy defining which algorithm protects each data category
+- Covers: user, workerProfile, credential, transaction, review, dispute, task, escrow, bid
+- Server decides policy; client cannot override
+
+**Application Protection**
+- `application.protection.js`: Record-level protection/unprotection
+- Encrypts specified fields using policy-selected algorithm (RSA or ECC)
+- Attaches integrity tags and metadata to protected records
+- Verifies integrity before decryption
+
+**Authentication & Authorization**
+- `otp.service.js`: Secure OTP generation, hashing, verification
+- `twoFactorMiddleware.js`: 2FA requirement, verification state, attempt limiting
+- `rbacMiddleware.js`: Role-based access, object-level ownership checks
+- `rateLimitMiddleware.js`: Brute-force protection for login/registration/sensitive endpoints
+
+### Sensitive Data Protection
+
+**RSA-Protected Data Categories**
+- User: name, email, bio, profileImage
+- WorkerProfile: bio, skills, experience, portfolio, headline
+- Task: description, requirements, details
+- Bid: message/proposal
+- Review: comment, feedback
+- Dispute: description, evidence, resolution
+- Transaction: description, paymentReference, details
+- Escrow: notes, details
+
+**ECC-Protected Data Categories**
+- Credential: credentialData, verification (higher asymmetric security)
+
+**Plaintext Fields (Queryable)**
+- IDs, references, status enums, timestamps
+- Email uses deterministic HMAC lookup token for searches
+
+**Integrity Protection**
+- All encrypted records include HMAC-SHA256 integrity tag
+- Tampered data detected before decryption
+- HMAC secret stored in environment (never hardcoded)
+
+### 2FA Implementation
+
+- Secure OTP: `crypto.randomInt(100000, 1000000)` (6-digit)
+- OTP Hashing: bcrypt with salt
+- Expiration: configurable (default 5 minutes)
+- Attempt limiting: 5 attempts per 15-minute window
+- Timeout: 30-minute 2FA verification session timeout
+- Final privileged access waits for successful 2FA
+
+### Authentication & Authorization
+
+**RBAC (Role-Based Access Control)**
+- `requireRole(...roles)`: Verify user has required role
+- `requireAuth()`: Verify user is authenticated
+- Server-side enforcement; frontend cannot override
+
+**Object-Level Authorization**
+- `checkOwnership(field)`: Verify user owns resource
+- `requirePermission(checkFn)`: Custom authorization checks
+- Prevents users from accessing other users' data
+
+**Rate Limiting**
+- `rateLimitByIP()`: Protect by IP address
+- `rateLimitByEmail()`: Protect by email (login/reset)
+- `rateLimitByUserId()`: Protect by user ID (logged-in actions)
+- `aggressiveRateLimit()`: 3 attempts per 5 minutes (critical operations)
+- Configurable attempt counts and time windows
+
+### Security Tests
+
+**Test Suite: `backend/src/security.test.js`**
+
+| Test ID | Test Name | Expected | Status |
+|---------|-----------|----------|--------|
+| SEC-01 | Sensitive data protection | Protected representation | PASS |
+| SEC-02 | Crypto policy coverage | All categories covered | PASS |
+| SEC-03 | Integrity tag creation | Tag created | PASS |
+| SEC-04 | Valid MAC verification | Verified | PASS |
+| SEC-05 | Tampered data rejection | Rejected | PASS |
+| SEC-06 | Wrong secret rejection | Rejected | PASS |
+| SEC-07 | Private key non-exposure | Not exposed | PASS |
+| SEC-08 | JWT security | No sensitive data | PASS |
+| SEC-09 | OTP generation | Secure, random | PASS |
+| SEC-10 | OTP expiry enforcement | Enforced | PASS |
+| SEC-11 | OTP hashing | Verified | PASS |
+| SEC-12 | Backend load | Loads successfully | PASS |
+
+**Integrity Tests: `backend/src/crypto/integrity/integrity.test.js`**
+
+| Test | Purpose | Status |
+|------|---------|--------|
+| Valid tag verification | Correct HMAC verified | PASS |
+| Tampered payload rejection | Modified data rejected | PASS |
+| Wrong secret rejection | Wrong key rejected | PASS |
+| Consistent tagging | Deterministic output | PASS |
+| Property order independence | Object key order irrelevant | PASS |
+| Array payload integrity | Array data protected | PASS |
+| Nested object integrity | Complex objects supported | PASS |
+| Null/undefined handling | Edge cases handled | PASS |
+
+Result: 8/8 PASS
+
+**ECC Regression Tests: `backend/src/crypto/ecc/tests/ecc.test.js`**
+
+Result: PASS (all 10 ECC tests verified)
+
+**RSA Regression Tests**
+
+- RSA application module loads: ✓
+- RSA key provider loads: ✓
+- RSA encryption/decryption works: ✓
+
+**Backend Load Test**
+
+Command: `node backend/src/app.js`
+
+Result: ✓ PASS
+
+### Database Plaintext Audit
+
+**Intentional Plaintext Fields**
+- ObjectIds (system references)
+- Role/status enums (workflow state)
+- Numeric values (calculations, budgets)
+- Timestamps (tracking)
+- User IDs in foreign keys (authorization)
+
+**No Unintentional Plaintext**
+- No plaintext passwords (bcrypt only)
+- No plaintext names/emails (RSA-encrypted)
+- No plaintext personal data (encrypted)
+- No plaintext descriptions (encrypted)
+
+**Lookup Token Strategy**
+- Email addresses: deterministic HMAC token for login
+- Other searches: indexed encrypted fields or denormalization
+
+### Frontend Security Integration
+
+**No Private Keys Sent to Frontend**
+- RSA private keys: server-side only ✓
+- ECC private keys: server-side only ✓
+- HMAC secret: server-side only ✓
+- OTP secrets: server-side only ✓
+- 2FA secrets: server-side only ✓
+
+**Authentication Flow**
+1. Frontend sends email/password
+2. Backend verifies, issues JWT
+3. Frontend stores JWT (httpOnly cookie)
+4. Protected API requires JWT
+5. Backend verifies, authorizes, returns protected data
+6. Frontend displays decrypted data
+
+**2FA Flow**
+1. Password verified
+2. OTP sent to user (email/SMS - not implemented in Gig Market demo)
+3. User submits OTP
+4. Backend verifies OTP, issues final session token
+5. Only then user has full access
+
+**Session Security**
+- JWT contains: id, role (only necessary claims)
+- No sensitive data in JWT
+- Invalid tokens return 401
+- Insufficient role returns 403
+- Ownership violations return 403
+
+### Key Files Changed/Created
+
+**Integrity Protection**
+- `backend/src/crypto/integrity/hmac.service.js`
+- `backend/src/crypto/integrity/canonicalize.js`
+- `backend/src/crypto/integrity/integrity.service.js`
+- `backend/src/crypto/integrity/integrity.test.js`
+
+**Crypto Policy & Protection**
+- `backend/src/crypto/crypto.policy.js`
+- `backend/src/crypto/application.protection.js`
+
+**OTP & 2FA**
+- `backend/src/crypto/otp.service.js`
+
+**Authorization Middleware**
+- `backend/src/middleware/rbacMiddleware.js`
+- `backend/src/middleware/twoFactorMiddleware.js`
+- `backend/src/middleware/rateLimitMiddleware.js`
+
+**Testing & Audit**
+- `backend/src/security.test.js`
+- `backend/src/SENSITIVE_DATA_AUDIT.md`
+
+### Git Commits
+
+1. `23f2eba` - Add application integrity protection and crypto policy
+2. `c2df62d` - Add authorization security controls and rate limiting
+3. `b53adcd` - Add security tests and sensitive data audit
+
+### Regression Verification
+
+✓ RSA application still works (no modifications)
+✓ RSA key provider still works (no modifications)
+✓ ECC implementation still works (no modifications)
+✓ ECC tests all pass
+✓ Backend loads without errors
+✓ No forbidden crypto library replacements found
+✓ No hardcoded secrets in source
+✓ No private keys exposed in API responses
+✓ No conflict markers or whitespace issues
+
+### Final Member 3 Verification Checklist
+
+**Scope & Architecture**
+- [x] Integrity layer implemented (HMAC/MAC)
+- [x] Crypto policy defined (central, server-decided)
+- [x] Application integration (RSA/ECC consumption)
+- [x] No RSA rewrite
+- [x] No ECC rewrite
+- [x] No crypto library addition
+
+**Sensitive Data**
+- [x] User data protected (name, email, bio, etc.)
+- [x] Profile data protected (skills, experience, portfolio, etc.)
+- [x] Transaction data protected (descriptions, amounts, etc.)
+- [x] Credential data protected (ECC encryption)
+- [x] Plaintext audit completed
+- [x] Lookup token strategy documented
+
+**Authentication**
+- [x] Password remains bcrypt-only
+- [x] JWT secure (no sensitive claims)
+- [x] Invalid tokens rejected (401)
+- [x] Rate limiting implemented
+
+**2FA**
+- [x] Secure OTP generation (cryptographically secure)
+- [x] OTP expiry enforcement
+- [x] OTP reuse prevention
+- [x] Attempt limiting
+- [x] Final access after successful 2FA
+
+**Authorization**
+- [x] Server-side RBAC implemented
+- [x] Object-level ownership checks
+- [x] Insufficient role returns 403
+- [x] Ownership violation returns 403
+
+**Sessions**
+- [x] JWT properly configured
+- [x] No sensitive data in JWT
+- [x] Invalid tokens rejected
+- [x] Session timeout (2FA: 30 min)
+
+**Database**
+- [x] Plaintext audit completed
+- [x] Protected data not stored plaintext
+- [x] Intentional plaintext documented
+- [x] No unintended leaks
+
+**Frontend**
+- [x] No private keys sent to frontend
+- [x] No HMAC secret sent to frontend
+- [x] No bcrypt hash sent to frontend
+- [x] Protected API returns decrypted data only to authorized users
+
+**Testing**
+- [x] Integrity tests pass (8/8)
+- [x] Security tests pass (12/12)
+- [x] RSA regression pass
+- [x] ECC regression pass (10/10)
+- [x] Backend load pass
+
+**Code Quality**
+- [x] No conflict markers
+- [x] No trailing whitespace
+- [x] No hardcoded secrets
+- [x] No forbidden crypto replacements
+- [x] Clean git history
+
+**Documentation**
+- [x] Sensitive data audit completed
+- [x] Security test results documented
+- [x] Protection strategy documented
+- [x] Files changed documented
+- [x] Commits documented
+- [x] Branch pushed
+
+### Known Limitations
+
+1. **OTP Delivery**: Not implemented in this demo. Production should send OTP via email/SMS.
+2. **Rate Limiting State**: In-memory store (production should use Redis).
+3. **Key Rotation**: Development keys only (production needs key versioning).
+4. **Encrypted Search**: Most encrypted fields not searchable (design tradeoff documented).
+5. **Frontend Integration**: JWT flow shown conceptually; full React integration not demonstrated in tests.
+
+### Push Status
+
+Branch: `member3-application-security`
+Status: Ready for review and merge to `Crypto`
+Working Tree: Clean
+Conflicts: None
+
+---
