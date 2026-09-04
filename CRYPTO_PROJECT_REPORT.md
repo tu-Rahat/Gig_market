@@ -154,6 +154,76 @@ PASS
 
 Member 1 RSA implementation is complete.
 
+## Member 2 - Custom ECC
+
+### Curve
+
+- Curve: custom from-scratch secp256k1 short-Weierstrass curve
+- Equation: `y^2 = x^3 + ax + b mod p`
+- `p = 2^256 - 2^32 - 977`
+- `a = 0`, `b = 7`
+- `G` and `n` use the published secp256k1 generator and subgroup order
+
+### From-Scratch Mathematics
+
+- BigInt modular reduction, field arithmetic, extended Euclidean algorithm, and modular inverse
+- Point-at-infinity identity, point validation, addition, doubling, negation, subtraction, and repeated-doubling scalar multiplication
+- Public keys are checked for curve membership and subgroup membership
+
+### Key Generation
+
+Private scalars are generated with Node's secure `randomBytes` utility and public keys are derived using the custom scalar multiplication implementation. Private keys are held only by the development provider at runtime.
+
+### ECDH
+
+Alice and Bob derive `a(bG)` and `b(aG)` respectively. The resulting curve points are equal. Invalid private keys and peer points are rejected.
+
+### ECDSA
+
+Signing and verification use the custom ECDSA equations with SHA-256 only as the message hash. Valid signatures pass and modified messages, invalid signatures, and invalid public points fail.
+
+### EC-ElGamal
+
+Point encryption uses `C1 = kG` and `C2 = M + kQ`; decryption computes `M = C2 - dC1`. The application text API uses a documented try-and-increment-style mapping: the UTF-8 integer is multiplied by 256 and a counter is added until the resulting x-coordinate has a curve square root. Text is limited to 29 UTF-8 bytes for this academic point encoding.
+
+### Key Provider
+
+`configureDevelopmentECCProvider`, `getECCPublicKey`, `getECCPrivateKey`, and `rotateECCKey` provide a replaceable development adapter. Rotation replaces the active development key; production rotation must retain old key versions for existing ciphertext.
+
+### Application API
+
+Member 3 can use `encryptText`, `decryptText`, `signWithManagedKey`, `verifyWithManagedKey`, `signSerialized`, `verifySerialized`, and `deriveSharedSecret` from `backend/src/crypto/ecc/ecc.application.js`. Point and signature serialization converts BigInt values to hexadecimal strings and ciphertext metadata includes algorithm, curve, key ID, version, and encoding.
+
+### Security
+
+No built-in ECC operation or ECC library is used. Private keys are not returned by the application API, logged, sent to React, or stored in ciphertext metadata. Inputs are validated and random scalars use Node's secure random byte generator.
+
+### Tests
+
+Command: `node backend/src/crypto/ecc/tests/ecc.test.js`
+
+Result: PASS. Tests cover curve arithmetic, identity and inverse, subgroup order, key generation, ECDH, ECDSA, EC-ElGamal, managed API serialization, invalid points, invalid signatures, tampered messages, invalid peers, and invalid private keys.
+
+RSA application/provider loading and backend application loading were also checked after the ECC package was added.
+
+### Files Changed
+
+- `backend/src/crypto/ecc/ecc.math.js`
+- `backend/src/crypto/ecc/ecc.curve.js`
+- `backend/src/crypto/ecc/ecc.keys.js`
+- `backend/src/crypto/ecc/ecc.ecdh.js`
+- `backend/src/crypto/ecc/ecc.ecdsa.js`
+- `backend/src/crypto/ecc/ecc.elgamal.js`
+- `backend/src/crypto/ecc/ecc.serialization.js`
+- `backend/src/crypto/ecc/ecc.keyProvider.js`
+- `backend/src/crypto/ecc/ecc.application.js`
+- `backend/src/crypto/ecc/tests/ecc.test.js`
+
+### Git
+
+- Branch: `crypto_ecc`
+- Commit and push status: performed by the repository owner when ready
+
 Branch:
 member1-rsa
 
