@@ -2,6 +2,7 @@ const express = require("express");
 
 const {
     adminLogin,
+    adminLogout,
     getPendingCredentials,
     approveCredential,
     rejectCredential
@@ -19,6 +20,8 @@ router.post(
     "/login",
     adminLogin
 );
+
+router.post("/logout", adminLogout);
 
 
 // Get all pending credential requests

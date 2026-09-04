@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { getProfile, logoutUser } from "./authAPI";
 
 
 const AuthContext = createContext();
@@ -20,23 +21,29 @@ export const AuthProvider = ({ children }) => {
 
 
 
-    const [token, setToken] = useState(() => {
+    const [token, setToken] = useState(Boolean(user));
+    const [loading, setLoading] = useState(true);
 
-        return localStorage.getItem("token");
-
-    });
+    useEffect(() => {
+        getProfile()
+            .then((data) => {
+                setUser(data.user);
+                setToken(true);
+                localStorage.setItem("user", JSON.stringify(data.user));
+            })
+            .catch(() => {
+                setUser(null);
+                setToken(false);
+                localStorage.removeItem("user");
+            })
+            .finally(() => setLoading(false));
+    }, []);
 
 
 
     const login = (data) => {
 
-        const { token, user } = data;
-
-
-        localStorage.setItem(
-            "token",
-            token
-        );
+        const { user } = data;
 
 
         localStorage.setItem(
@@ -45,7 +52,7 @@ export const AuthProvider = ({ children }) => {
         );
 
 
-        setToken(token);
+        setToken(true);
 
         setUser(user);
 
@@ -53,18 +60,14 @@ export const AuthProvider = ({ children }) => {
 
 
 
-    const logout = () => {
-
-
-        localStorage.removeItem("token");
-
+    const logout = async () => {
+        try {
+            await logoutUser();
+        } finally {
         localStorage.removeItem("user");
-
-
-        setToken(null);
-
+        setToken(false);
         setUser(null);
-
+        }
     };
 
 
@@ -78,6 +81,7 @@ export const AuthProvider = ({ children }) => {
                 login,
                 logout,
                 isAuthenticated: !!token,
+                loading,
             }}
         >
 

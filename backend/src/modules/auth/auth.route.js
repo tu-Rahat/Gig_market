@@ -8,6 +8,7 @@ const router = express.Router();
 const {
     registerUser,
     loginUser,
+    logoutUser,
     getProfile
 } = require("./auth.controller");
 
@@ -16,6 +17,7 @@ const {
 router.post("/register", registerUser);
 
 router.post("/login", loginUser);
+router.post("/logout", logoutUser);
 
 
 // Protected Route

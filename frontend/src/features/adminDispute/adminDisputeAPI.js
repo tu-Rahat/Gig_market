@@ -2,17 +2,7 @@ import api from "../../services/api";
 
 
 const getAdminConfig = () => {
-
-    const token =
-        localStorage.getItem("adminToken");
-
-    return {
-        headers: {
-            Authorization:
-                `Bearer ${token}`
-        }
-    };
-
+    return {};
 };
 
 

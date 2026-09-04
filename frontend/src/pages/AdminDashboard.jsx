@@ -10,7 +10,8 @@ import {
 import {
     getPendingCredentials,
     approveCredential,
-    rejectCredential
+    rejectCredential,
+    logoutAdmin
 } from "../features/admin/adminAPI";
 
 
@@ -60,10 +61,6 @@ const AdminDashboard = () => {
                     err.response?.status === 401 ||
                     err.response?.status === 403
                 ) {
-
-                    localStorage.removeItem(
-                        "adminToken"
-                    );
 
                     navigate(
                         "/admin/login"
@@ -205,12 +202,8 @@ const AdminDashboard = () => {
         };
 
 
-    const handleLogout = () => {
-
-        localStorage.removeItem(
-            "adminToken"
-        );
-
+    const handleLogout = async () => {
+        await logoutAdmin().catch(() => {});
         navigate(
             "/admin/login"
         );

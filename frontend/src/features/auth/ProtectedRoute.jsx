@@ -4,7 +4,9 @@ import { useAuth } from "./authContext";
 
 const ProtectedRoute = ({ children }) => {
 
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, loading } = useAuth();
+
+    if (loading) return null;
 
 
     if (!isAuthenticated) {
