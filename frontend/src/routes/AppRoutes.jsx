@@ -1,7 +1,6 @@
 import {
     Routes,
     Route,
-    Navigate,
     useParams
 } from "react-router-dom";
 import AdminLogin from
@@ -36,6 +35,7 @@ import Credentials from "../pages/Credentials";
 import CredentialBidderFilter from "../features/bidderFilter/CredentialBidderFilter";
 import ProfessionalProfile from "../features/workerProfile/ProfessionalProfile";
 import WorkerProfile from "../features/workerProfile/WorkerProfileView";
+import BadgesPage from "../features/badges/BadgesPage";
 import Reviews from "../pages/Reviews";
 import BidderComparison from "../pages/BidderComparison";
 import NearbyProviders from "../pages/NearbyProviders";
@@ -240,7 +240,7 @@ const AppRoutes = () => {
                     path="/badges"
                     element={
                         <ProtectedRoute>
-                            <Navigate to="/profile/professional" replace />
+                            <BadgesPage />
                         </ProtectedRoute>
                     }
                 />

@@ -1,0 +1,200 @@
+PROJECT: Gig Market
+BRANCH: main
+
+TASK: Redesign Feature 13 — Badges & Achievements.
+
+IMPORTANT:
+- Feature 11 (Professional Profile) is already working correctly.
+- DO NOT redesign, remove, or break Feature 11.
+- Feature 13 should become a clearly separated Badges & Achievements experience.
+- Do NOT create a second/parallel profile system.
+- Preserve the existing Feature 13 backend badge logic and real badge criteria.
+- Do NOT invent fake badge criteria or hardcoded earned badges.
+- Keep the existing API/data flow wherever possible.
+
+CURRENT REAL BADGE LOGIC:
+1. verified_provider
+   - awarded when verified credential count > 0
+2. top_rated
+   - awarded when average rating >= 4.5 AND review count >= 5
+3. expert_professional
+   - awarded when completedJobs >= 20 AND average rating >= 4.5 AND review count >= 10
+
+EXISTING BADGE BACKEND:
+- backend/src/modules/badge/badge.service.js
+- updateProviderBadges(providerId)
+- Badge data is stored in provider.badges
+- Existing recalculation hooks must continue working.
+
+GOAL:
+Transform the current small "Badges" box/pill inside the professional profile into a proper Feature 13 Badges & Achievements experience.
+
+DESIGN:
+
+1. FEATURE 11
+Keep Professional Profile functionality unchanged.
+
+If Feature 11 currently shows a badge preview, it may remain as a small preview, but it should NOT become the main badge interface.
+
+2. FEATURE 13 PAGE
+Create/redesign the existing Feature 13 route/component rather than creating a duplicate profile system.
+
+Page header:
+"Badges & Achievements"
+
+Subtitle:
+"Earn recognition and build trust with clients."
+
+Add a summary area:
+- Earned badges count
+- Available/locked badges count
+
+3. BADGE CARDS
+
+Create a clean modern card/grid layout.
+
+Each badge should visually communicate its state:
+
+A. EARNED
+Show:
+- badge icon
+- badge name
+- short explanation
+- "Earned" status
+- awarded date when available
+
+B. PROGRESS
+If useful based on existing real backend data, show progress toward the next badge.
+Example:
+"6 / 20 completed jobs"
+with a progress bar.
+
+Do not fabricate progress values. Only calculate from real provider data.
+
+C. LOCKED
+Show:
+- badge icon
+- badge name
+- requirement
+- locked state
+
+Do not present locked badges as earned.
+
+4. EXISTING BADGES
+
+Use the actual existing badge types:
+- Verified Provider
+- Top Rated
+- Expert Professional
+
+Map the existing backend badge type values to attractive user-facing names/icons/descriptions.
+
+Do not change the backend badge criteria unless absolutely necessary.
+
+5. VERIFIED CREDENTIALS
+
+Keep "Verified Credentials" conceptually separate from badges.
+
+Badges = achievements/status awarded by the platform.
+
+Credentials = verified evidence submitted by the provider.
+
+If credentials are currently displayed inside Feature 11, preserve the existing functionality, but Feature 13 may provide a relevant credentials/trust section or link without duplicating the credential management system.
+
+6. VISUAL STYLE
+
+Use the existing Gig Market design language.
+
+Requirements:
+- clean professional layout
+- modern cards
+- rounded borders
+- good spacing
+- responsive desktop/mobile behavior
+- clear visual hierarchy
+- badge icons should be prominent
+- earned/locked states should be immediately understandable
+- avoid excessive colors or decorative elements
+- do not make the page look like a gaming achievement screen
+- maintain consistency with the existing application
+
+7. DATA/LOGIC
+
+Inspect the existing Feature 13 frontend and backend before modifying anything.
+
+Find:
+- existing badge API
+- provider.badges structure
+- badge service
+- current badge rendering
+- existing routes
+- existing provider profile data
+
+Reuse existing APIs and backend calculations.
+
+Do not duplicate badge calculation in multiple frontend components.
+
+If progress indicators require provider.rating, provider.completedJobs, credential count, or review count, use actual backend-returned values.
+
+8. ROUTING
+
+Keep the existing Feature 13 route if one exists.
+
+Do not create a parallel `/profile` or worker profile system.
+
+Ensure Feature 11 links/previews to Feature 13 correctly if such navigation already exists.
+
+9. BACKWARD COMPATIBILITY
+
+Existing users with:
+- no badges
+- one badge
+- multiple badges
+must render correctly.
+
+Handle missing/null/empty badge arrays gracefully.
+
+10. TESTING
+
+After implementation:
+
+Frontend:
+- verify Feature 11 still loads
+- verify Feature 13 loads
+- verify badge data appears correctly
+- verify earned/locked states
+- verify empty state
+- verify responsive layout
+- verify navigation
+
+Backend:
+- verify existing badge API
+- verify badge recalculation still works
+- verify existing badge criteria are unchanged
+
+Run appropriate lint/build/tests available in the project.
+
+Also search for references to the old badge UI and make sure the redesign does not leave broken imports, duplicate components, or dead routes.
+
+11. REPORT
+
+Update ONLY the existing persistent implementation report file:
+IMPLEMENTATION_REPORT.md
+
+Record:
+- what was changed
+- files modified
+- existing badge logic preserved
+- UI changes
+- tests performed and results
+- any issues
+- commit/push/deploy status
+
+Do NOT create another implementation report.
+
+IMPORTANT FINAL CHECK:
+Feature 11 = Professional Profile.
+Feature 13 = Badges & Achievements.
+They should work together, but they must no longer look like the same feature.
+
+Do not commit, push, or deploy unless explicitly instructed.

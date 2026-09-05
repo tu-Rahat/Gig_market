@@ -111,7 +111,7 @@ export const dashboardSections = [
                 title: "Badges",
                 description:
                     "View earned reputation and qualification badges.",
-                path: "/profile/professional",
+                path: "/badges",
                 status: "available",
             },
             {
