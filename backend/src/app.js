@@ -61,6 +61,9 @@ const reviewRoutes = require(
 const providerRoutes = require(
     "./modules/provider/provider.route"
 );
+const messageRoutes = require(
+    "./modules/message/message.route"
+);
 
 const app = express();
 
@@ -93,6 +96,10 @@ app.use("/api/bidder-filter",bidderFilterRoutes);
 app.use(
     "/api/providers",
     providerRoutes
+);
+app.use(
+    "/api/messages",
+    messageRoutes
 );
 
 app.use(

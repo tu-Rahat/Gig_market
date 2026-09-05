@@ -12,6 +12,7 @@ const Task = require(
     "../task/task.model"
 );
 
+// Existing custom ECC implementation
 const {
     encryptText,
     decryptText
@@ -54,18 +55,18 @@ const buildEvidence = (file) => {
 };
 
 /*
- * Decrypt completion notes when returning them
- * to an authorized application user.
+ * ECC helper
  *
- * Older submissions may contain plaintext strings.
- * New submissions contain ECC ciphertext objects.
+ * New WorkSubmission records contain an ECC ciphertext object.
+ * Old records may still contain plaintext strings.
+ *
+ * String values are treated as legacy plaintext.
+ * ECC objects are decrypted using the existing ECC implementation.
  */
 const decryptCompletionNote = async (
     completionNote
 ) => {
-    if (
-        typeof completionNote === "string"
-    ) {
+    if (typeof completionNote === "string") {
         return completionNote;
     }
 
@@ -83,8 +84,10 @@ const decryptCompletionNote = async (
 };
 
 /*
- * Convert a submission document into an API
- * response while keeping the database value encrypted.
+ * Convert a WorkSubmission into an API-safe response object.
+ *
+ * MongoDB keeps the encrypted ECC ciphertext.
+ * The frontend receives the original plaintext.
  */
 const buildSubmissionResponse = async (
     submission
@@ -126,6 +129,8 @@ const submitCompletedWork = async (
         const trimmedCompletionNote =
             completionNote.trim();
 
+        // Preserve the existing 3000-character
+        // plaintext limit.
         if (
             trimmedCompletionNote.length > 3000
         ) {
@@ -163,9 +168,7 @@ const submitCompletedWork = async (
             });
         }
 
-        if (
-            escrow.status !== "held"
-        ) {
+        if (escrow.status !== "held") {
             removeUploadedFile(req.file);
 
             return res.status(400).json({
@@ -207,8 +210,8 @@ const submitCompletedWork = async (
         /*
          * ECC ENCRYPTION
          *
-         * The plaintext completion note is encrypted
-         * before being stored in MongoDB.
+         * Only the encrypted ciphertext is stored
+         * in MongoDB.
          */
         const keyId =
             configureDevelopmentECCProvider();
@@ -226,7 +229,7 @@ const submitCompletedWork = async (
                 owner: escrow.owner,
                 worker: escrow.worker,
 
-                // Store ECC ciphertext.
+                // Store ECC ciphertext, NOT plaintext.
                 completionNote:
                     encryptedCompletionNote,
 
@@ -250,8 +253,9 @@ const submitCompletedWork = async (
         );
 
         /*
-         * Return decrypted text to the authorized
-         * frontend while keeping MongoDB encrypted.
+         * Decrypt only for the API response.
+         *
+         * MongoDB still contains ciphertext.
          */
         const responseSubmission =
             await buildSubmissionResponse(
@@ -272,8 +276,7 @@ const submitCompletedWork = async (
             message:
                 "Failed to submit completed work",
 
-            error:
-                error.message
+            error: error.message
         });
     }
 };
@@ -325,19 +328,15 @@ const getWorkerAssignments = async (
             );
 
         return res.status(200).json({
-            count:
-                items.length,
-
-            assignments:
-                items
+            count: items.length,
+            assignments: items
         });
     } catch (error) {
         return res.status(500).json({
             message:
                 "Failed to load worker assignments",
 
-            error:
-                error.message
+            error: error.message
         });
     }
 };
@@ -370,8 +369,8 @@ const getOwnerPendingSubmissions = async (
             });
 
         /*
-         * Decrypt completion notes only after the
-         * owner authorization query has been applied.
+         * Decrypt completionNote only for the
+         * authorized owner's API response.
          */
         const responseSubmissions =
             await Promise.all(
@@ -396,8 +395,7 @@ const getOwnerPendingSubmissions = async (
             message:
                 "Failed to load pending submissions",
 
-            error:
-                error.message
+            error: error.message
         });
     }
 };
@@ -423,6 +421,12 @@ const getSubmissionHistory = async (
         const userId =
             req.user.id;
 
+        /*
+         * Preserve existing authorization.
+         *
+         * Only the escrow owner or selected
+         * worker can access submission history.
+         */
         if (
             escrow.owner.toString() !==
                 userId &&
@@ -473,8 +477,7 @@ const getSubmissionHistory = async (
             message:
                 "Failed to load submission history",
 
-            error:
-                error.message
+            error: error.message
         });
     }
 };
@@ -554,9 +557,7 @@ const reviewCompletedWork = async (
             });
         }
 
-        if (
-            escrow.status !== "held"
-        ) {
+        if (escrow.status !== "held") {
             return res.status(400).json({
                 message:
                     "Work can only be reviewed while escrow is held"
@@ -604,6 +605,10 @@ const reviewCompletedWork = async (
 
             await escrow.save();
 
+            /*
+             * Return decrypted completionNote
+             * to the authorized owner.
+             */
             const responseSubmission =
                 await buildSubmissionResponse(
                     submission
@@ -634,6 +639,10 @@ const reviewCompletedWork = async (
 
         await submission.save();
 
+        /*
+         * Return decrypted completionNote
+         * to the authorized owner.
+         */
         const responseSubmission =
             await buildSubmissionResponse(
                 submission
@@ -651,8 +660,7 @@ const reviewCompletedWork = async (
             message:
                 "Failed to review completed work",
 
-            error:
-                error.message
+            error: error.message
         });
     }
 };
