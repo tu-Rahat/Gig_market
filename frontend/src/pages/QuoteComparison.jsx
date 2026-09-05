@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { selectProvider, getTaskQuotes } from "../features/bid/bidAPI";
+import MessagePanel from "../features/message/MessagePanel";
 
 const QuoteComparison = ({ taskId }) => {
     const [taskTitle, setTaskTitle] = useState("");
@@ -8,6 +9,7 @@ const QuoteComparison = ({ taskId }) => {
     const [selectingBidId, setSelectingBidId] = useState(null);
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
+    const [openConversationBidId, setOpenConversationBidId] = useState(null);
 
     const loadQuotes = async () => {
         try {
@@ -97,6 +99,19 @@ const QuoteComparison = ({ taskId }) => {
                                     )}
                                 </div>
                                 <div className="flex items-start gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setOpenConversationBidId(
+                                            openConversationBidId === quote.bid._id
+                                                ? null
+                                                : quote.bid._id
+                                        )}
+                                        className="border px-4 py-2 rounded-xl"
+                                    >
+                                        {openConversationBidId === quote.bid._id
+                                            ? "Close Chat"
+                                            : "Message Bidder"}
+                                    </button>
                                     {isSelected ? (
                                         <span className="border rounded-xl px-4 py-2">Selected Provider</span>
                                     ) : (
@@ -112,6 +127,13 @@ const QuoteComparison = ({ taskId }) => {
                                     )}
                                 </div>
                             </div>
+                            {openConversationBidId === quote.bid._id && (
+                                <MessagePanel
+                                    taskId={taskId}
+                                    bidId={quote.bid._id}
+                                    participantName={quote.provider.name}
+                                />
+                            )}
                         </article>
                     );
                 })}

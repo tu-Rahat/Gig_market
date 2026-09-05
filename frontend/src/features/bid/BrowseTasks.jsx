@@ -6,6 +6,7 @@ import {
     getBidSummary,
     submitBid
 } from "./bidAPI";
+import MessagePanel from "../message/MessagePanel";
 
 const BrowseTasks = () => {
     const [tasks, setTasks] = useState([]);
@@ -16,6 +17,7 @@ const BrowseTasks = () => {
     const [workingTaskId, setWorkingTaskId] = useState(null);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [openConversationTaskId, setOpenConversationTaskId] = useState(null);
 
     const loadSummary = async (taskId) => {
         try {
@@ -188,6 +190,30 @@ const BrowseTasks = () => {
                                         To bid again, enter a LOWER amount.
                                     </p>
                                 </div>
+                            )}
+
+                            {summary?.myBid && (
+                                <button
+                                    type="button"
+                                    onClick={() => setOpenConversationTaskId(
+                                        openConversationTaskId === task._id
+                                            ? null
+                                            : task._id
+                                    )}
+                                    className="mt-4 border px-4 py-2 rounded-xl"
+                                >
+                                    {openConversationTaskId === task._id
+                                        ? "Close Chat"
+                                        : "Message Client"}
+                                </button>
+                            )}
+
+                            {openConversationTaskId === task._id && summary?.myBid && (
+                                <MessagePanel
+                                    taskId={task._id}
+                                    bidId={summary.myBid._id}
+                                    participantName="Client"
+                                />
                             )}
 
                             <div className="mt-5 space-y-3">
